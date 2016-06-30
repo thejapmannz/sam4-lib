@@ -41,7 +41,7 @@ class samUART_c {
 	private:
 		bool uartWriteReady(void);
 		void uartWrite(uint8_t byte);
-		uint8_t uartRead(void);
+		int16_t uartRead(void);
 		bool uartReadReady(void);
 		
 		bool channel_id; // Channel can be 0 or 1 on SAM4S.

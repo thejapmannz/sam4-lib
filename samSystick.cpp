@@ -18,8 +18,8 @@ void samSysTick_c::Begin(uint32_t frequency, int32_t ledDebug) {
 	//Resets systick and assigns given frequency.
 	SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk; // Disable temporarily, if running
 	uint32_t ticks = samClock.MasterFreqGet() / frequency;
-	if (ticks > 0x00ffffff) {
-		ticks = 0x00ffffff; // Max 24-bit counter!
+	if (ticks > 0x01000000) {
+		ticks = 0x01000000; // Max 24-bit counter, and -1 later.
 	}
 	SysTick->LOAD = ticks - 1; // Load value. Note flag set when counting 1->0, so -1 ticks.
 	SysTick->VAL = 0; // Reset counter
