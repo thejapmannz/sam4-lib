@@ -8,6 +8,7 @@ Credit to Michael Hayes (mph-) for a lot of help during development.
 #Example program
 Copy-paste this into a blank Atmel Studio project's main file.
 
+```
 /*
  * sam-blinky.cpp
  * Simple blinky and serial debug. Uses 2 LEDs and 2 serial pins only.
@@ -122,3 +123,4 @@ int main(void) {
 		
 	}
 }
+```
