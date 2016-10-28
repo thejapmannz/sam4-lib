@@ -12,7 +12,7 @@
 #define SAMSERVO_H_
 
 #include "sam.h"
-//#include "samPWM.h"
+#include "samPWM.h"
 
 class samServo_c {
 	public:
@@ -20,7 +20,8 @@ class samServo_c {
 		// Again, too many PWM pin options, so GPIO pin and  
 		// peripheral mode still need to be set manually (see 
 		// GPIO library and SAM4s manual page 40).
-		void attach(pwmChannel_c* channel);
+		//Overdrive option gives extended pulse width range, for sloppy servos.
+		void attach(pwmChannel_c* channel, bool overdrive);
 		
 		//Sets or retrieves angle of servo, in degrees.
  		void write(uint16_t angle);
@@ -30,9 +31,9 @@ class samServo_c {
 		
 	private:
 		pwmChannel_c* pwmCh;
+		bool overdrive;
 };
 
 #include "samServo.cpp"
-
 
 #endif /* SAMSERVO_H_ */

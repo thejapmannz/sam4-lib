@@ -11,29 +11,24 @@
 
 #include "sam.h"
 #include "CircBuf.h"
-
-#define UART_BUFFER_SIZE 255
+#include "serial-funcs.h"
 
 enum {uart_parityEven, uart_parityOdd, uart_parityMark, uart_paritySpace, uart_parityNone};
 
-class samUART_c {
+class samUART_c: public SerialStream {
 	public:
 		//Initialiser - baud rate, parity.
 		void Begin(uint32_t baud, uint32_t parity);
-		//Updater, to be called at baud rate / 10 Hz.
-		void Update(void);
 		
 		//Write things to internal buffer:
 		void Write(uint8_t byte);
-		void WriteStr(char buffer[], uint32_t num_bytes);
-		//Write formatted things to internal buffer:
-		void PrintInt(int64_t value);
-		void PrintBits(uint32_t value);
 		
 		//Check if byte available, and Read a byte(s):
 		uint32_t Available(void);
-		uint8_t Read(void);
-		void ReadStr(char buffer[], uint32_t num_bytes);
+		int16_t Read(void); // Note returns -1 if receive buffer empty.
+		
+		//Updater - called as interrupt handler, but can be polled also.
+		void Update(void);
 		
 		//constructor - one instance for UART0 and UART1.
 		samUART_c(int id);

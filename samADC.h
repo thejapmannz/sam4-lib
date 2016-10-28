@@ -37,6 +37,7 @@ class samADC_c {
 		
 		//Triggers the ADC, then returns captured value. Blocking.
 		uint16_t Capture(uint8_t channel);
+		
 		//Returns the last ADC capture for the provided channel. No idiot checks!
 		uint16_t Read(uint8_t channel);
 		//Triggers the ADC conversion via software trigger.

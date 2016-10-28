@@ -84,50 +84,13 @@ void samUART_c::Write(uint8_t byte) {
 	//Enable transmit interrupts, to call update function.
 	UART1->UART_IER = UART_IER_TXRDY;
 }
-void samUART_c::WriteStr(char buffer[], uint32_t num_bytes) {
-	//Writes a whole string to internal buffer, to be sent.
-	for (uint32_t i = 0; i < num_bytes; i++) {
-		this->Write(buffer[i]);
-	}
-}
-void samUART_c::PrintInt(int64_t value) {
-	// Sends a number to UART, as we humans would read it.
-	uint32_t digit = 0;
-	if (value < 0) {
-		this->Write('-');
-		value = -value;
-	}
-	
-	bool started = 0;
-	for (int32_t i = 10; i >= 0; i--) { // Max 2x10^10 for 32-bit.
-		digit = value;
-		for (int32_t j = 0; j < i; j++) { // No power function available.
-			digit /= 10;
-		}
-		digit %= 10;
-		if (digit) {
-			started = 1;
-		}
-		if (started || (i == 0)) {
-			this->Write(digit + '0');
-		}
-	}
-}
-void samUART_c::PrintBits(uint32_t value) {
-	//Sends a number to UART, as 32 bits.
-	for (int i = 31; i >= 0; i--) {
-		this->Write((value & (1 << i)) ? '1' : '0');
-	}
-}
-uint8_t samUART_c::Read(void) {
+
+int16_t samUART_c::Read(void) {
 	//Returns a byte from the internal buffer.
-	return this->recieveBuffer.Pop();
-}
-void samUART_c::ReadStr(char buffer[], uint32_t num_bytes) {
-	//Reads a whole string from internal receive buffer.
-	for (uint32_t i = 0; i < num_bytes; i++) {
-		buffer[i] = this->Read();
-	}
+	if (this->Available())
+		return this->recieveBuffer.Pop();
+	else
+		return -1;
 }
 
 void samUART_c::Update(void) {
