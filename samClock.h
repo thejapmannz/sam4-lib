@@ -12,9 +12,7 @@
 
 #include "sam.h"
 
-// Copy into your main file after file include:
-// extern samClock_c samClock;
-
+// Defined options for function arguments:
 enum {clock_RCFreq4M, 
 	  clock_RCFreq8M, 
 	  clock_RCFreq12M};
@@ -78,6 +76,7 @@ class samClock_c {
 	
 	private:
 		uint32_t crystalFreq;
+		uint32_t MasterFreq;
 };
 
 #include "samClock.cpp"

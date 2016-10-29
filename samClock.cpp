@@ -111,6 +111,7 @@ void samClock_c::MasterSourceSet(uint32_t clock_source) {
 			PMC->PMC_MCKR = (PMC->PMC_MCKR & ~PMC_MCKR_CSS_Msk) | PMC_MCKR_CSS_PLLB_CLK; //Select PLLB clock
 			break;
 	}
+	this->MasterFreq = 0;
 }
 
 void samClock_c::MainSourceSet(uint32_t clock_source) {
@@ -123,12 +124,15 @@ void samClock_c::MainSourceSet(uint32_t clock_source) {
 			PMC->CKGR_MOR = (PMC->CKGR_MOR | CKGR_MOR_KEY (0x37)) & ~CKGR_MOR_MOSCSEL; //Clear crystal select for main clock
 			break;
 	}
+	this->MasterFreq = 0;
 }
 
 void samClock_c::PrescalerSet(uint32_t divide_amount) {
 	//Sets prescaler divider to 1, 2, 4, ..., 64, 3. Clear then set.
 	//Note that API named values are in this order, from 0x0<<4 to 0x7<<4.
 	PMC->PMC_MCKR = (PMC->PMC_MCKR & ~PMC_MCKR_PRES_Msk) | PMC_MCKR_PRES(divide_amount);
+	
+	this->MasterFreq = 0;
 }
 
 void samClock_c::RCFreqSet(uint32_t rc_freq) {
@@ -146,6 +150,8 @@ void samClock_c::RCFreqSet(uint32_t rc_freq) {
 			PMC->CKGR_MOR = (PMC->CKGR_MOR & ~CKGR_MOR_MOSCRCF_Msk) | CKGR_MOR_KEY (0x37) | CKGR_MOR_MOSCRCF_12_MHz;
 			break;
 	}
+	
+	this->MasterFreq = 0;
 }
 
 uint32_t samClock_c::AutoSetup(uint32_t desired_freq, uint32_t crystal_freq) {
@@ -248,98 +254,105 @@ uint32_t samClock_c::AutoSetup(uint32_t desired_freq, uint32_t crystal_freq) {
 		samClock_c::MasterSourceSet(clock_MasterSourcePLLA);
 		
 	}
+	
+	this->MasterFreq = actual_freq;
 	return actual_freq;
 }
 
 uint32_t samClock_c::MasterFreqGet(void) {
 	//Calculates clock frequency. Taken from SAM4 specification.
 	
-	uint32_t SystemCoreClock = 0;
-	/* Determine clock frequency according to clock register values */
-	switch ( PMC->PMC_MCKR & (uint32_t) PMC_MCKR_CSS_Msk ) {
-		case PMC_MCKR_CSS_SLOW_CLK: /* Slow clock */
-			if ( SUPC->SUPC_SR & SUPC_SR_OSCSEL ) {
-				SystemCoreClock = CHIP_FREQ_XTAL_32K;
-			}
-			else {
-				SystemCoreClock = CHIP_FREQ_SLCK_RC;
-			}
-			break;
-
-		case PMC_MCKR_CSS_MAIN_CLK: /* Main clock */
-			if ( PMC->CKGR_MOR & CKGR_MOR_MOSCSEL ) {
-				SystemCoreClock = samClock_c::crystalFreq;
-			}
-			else {
-				SystemCoreClock = CHIP_FREQ_MAINCK_RC_4MHZ;
-
-				switch ( PMC->CKGR_MOR & CKGR_MOR_MOSCRCF_Msk ) {
-					case CKGR_MOR_MOSCRCF_4_MHz:
-						SystemCoreClock = CHIP_FREQ_MAINCK_RC_4MHZ;
-						break;
-
-					case CKGR_MOR_MOSCRCF_8_MHz:
-						SystemCoreClock = CHIP_FREQ_MAINCK_RC_8MHZ;
-						break;
-
-					case CKGR_MOR_MOSCRCF_12_MHz:
-						SystemCoreClock = CHIP_FREQ_MAINCK_RC_12MHZ;
-						break;
-
-					default:
-						break;
+	if (this->MasterFreq == 0) {
+	
+		uint32_t SystemCoreClock = 0;
+		/* Determine clock frequency according to clock register values */
+		switch ( PMC->PMC_MCKR & (uint32_t) PMC_MCKR_CSS_Msk ) {
+			case PMC_MCKR_CSS_SLOW_CLK: /* Slow clock */
+				if ( SUPC->SUPC_SR & SUPC_SR_OSCSEL ) {
+					SystemCoreClock = CHIP_FREQ_XTAL_32K;
 				}
-			}
-			break;
-
-		case PMC_MCKR_CSS_PLLA_CLK:	/* PLLA clock */
-		case PMC_MCKR_CSS_PLLB_CLK:	/* PLLB clock */
-			if ( PMC->CKGR_MOR & CKGR_MOR_MOSCSEL ) {
-				SystemCoreClock = samClock_c::crystalFreq;
-			}
-			else {
-				SystemCoreClock = CHIP_FREQ_MAINCK_RC_4MHZ;
-
-				switch ( PMC->CKGR_MOR & CKGR_MOR_MOSCRCF_Msk ) {
-					case CKGR_MOR_MOSCRCF_4_MHz:
-						SystemCoreClock = CHIP_FREQ_MAINCK_RC_4MHZ;
-						break;
-
-					case CKGR_MOR_MOSCRCF_8_MHz:
-						SystemCoreClock = CHIP_FREQ_MAINCK_RC_8MHZ;
-						break;
-
-					case CKGR_MOR_MOSCRCF_12_MHz:
-						SystemCoreClock = CHIP_FREQ_MAINCK_RC_12MHZ;
-						break;
-
-					default:
-						break;
+				else {
+					SystemCoreClock = CHIP_FREQ_SLCK_RC;
 				}
-			}
+				break;
 
-			if ( (uint32_t)(PMC->PMC_MCKR & (uint32_t) PMC_MCKR_CSS_Msk) == PMC_MCKR_CSS_PLLA_CLK ) {
-				SystemCoreClock *= ((((PMC->CKGR_PLLAR) & CKGR_PLLAR_MULA_Msk) >> CKGR_PLLAR_MULA_Pos) + 1U);
-				SystemCoreClock /= ((((PMC->CKGR_PLLAR) & CKGR_PLLAR_DIVA_Msk) >> CKGR_PLLAR_DIVA_Pos));
-			}
-			else {
-				SystemCoreClock *= ((((PMC->CKGR_PLLBR) & CKGR_PLLBR_MULB_Msk) >> CKGR_PLLBR_MULB_Pos) + 1U);
-				SystemCoreClock /= ((((PMC->CKGR_PLLBR) & CKGR_PLLBR_DIVB_Msk) >> CKGR_PLLBR_DIVB_Pos));
-			}
-			break;
+			case PMC_MCKR_CSS_MAIN_CLK: /* Main clock */
+				if ( PMC->CKGR_MOR & CKGR_MOR_MOSCSEL ) {
+					SystemCoreClock = samClock_c::crystalFreq;
+				}
+				else {
+					SystemCoreClock = CHIP_FREQ_MAINCK_RC_4MHZ;
 
-		default:
-			break;
-	}
+					switch ( PMC->CKGR_MOR & CKGR_MOR_MOSCRCF_Msk ) {
+						case CKGR_MOR_MOSCRCF_4_MHz:
+							SystemCoreClock = CHIP_FREQ_MAINCK_RC_4MHZ;
+							break;
 
-	if ( (PMC->PMC_MCKR & PMC_MCKR_PRES_Msk) == PMC_MCKR_PRES_CLK_3 ) {
-		SystemCoreClock /= 3U;
-	}
-	else {
-		SystemCoreClock >>= ((PMC->PMC_MCKR & PMC_MCKR_PRES_Msk) >> PMC_MCKR_PRES_Pos);
+						case CKGR_MOR_MOSCRCF_8_MHz:
+							SystemCoreClock = CHIP_FREQ_MAINCK_RC_8MHZ;
+							break;
+
+						case CKGR_MOR_MOSCRCF_12_MHz:
+							SystemCoreClock = CHIP_FREQ_MAINCK_RC_12MHZ;
+							break;
+
+						default:
+							break;
+					}
+				}
+				break;
+
+			case PMC_MCKR_CSS_PLLA_CLK:	/* PLLA clock */
+			case PMC_MCKR_CSS_PLLB_CLK:	/* PLLB clock */
+				if ( PMC->CKGR_MOR & CKGR_MOR_MOSCSEL ) {
+					SystemCoreClock = samClock_c::crystalFreq;
+				}
+				else {
+					SystemCoreClock = CHIP_FREQ_MAINCK_RC_4MHZ;
+
+					switch ( PMC->CKGR_MOR & CKGR_MOR_MOSCRCF_Msk ) {
+						case CKGR_MOR_MOSCRCF_4_MHz:
+							SystemCoreClock = CHIP_FREQ_MAINCK_RC_4MHZ;
+							break;
+
+						case CKGR_MOR_MOSCRCF_8_MHz:
+							SystemCoreClock = CHIP_FREQ_MAINCK_RC_8MHZ;
+							break;
+
+						case CKGR_MOR_MOSCRCF_12_MHz:
+							SystemCoreClock = CHIP_FREQ_MAINCK_RC_12MHZ;
+							break;
+
+						default:
+							break;
+					}
+				}
+
+				if ( (uint32_t)(PMC->PMC_MCKR & (uint32_t) PMC_MCKR_CSS_Msk) == PMC_MCKR_CSS_PLLA_CLK ) {
+					SystemCoreClock *= ((((PMC->CKGR_PLLAR) & CKGR_PLLAR_MULA_Msk) >> CKGR_PLLAR_MULA_Pos) + 1U);
+					SystemCoreClock /= ((((PMC->CKGR_PLLAR) & CKGR_PLLAR_DIVA_Msk) >> CKGR_PLLAR_DIVA_Pos));
+				}
+				else {
+					SystemCoreClock *= ((((PMC->CKGR_PLLBR) & CKGR_PLLBR_MULB_Msk) >> CKGR_PLLBR_MULB_Pos) + 1U);
+					SystemCoreClock /= ((((PMC->CKGR_PLLBR) & CKGR_PLLBR_DIVB_Msk) >> CKGR_PLLBR_DIVB_Pos));
+				}
+				break;
+
+			default:
+				break;
+		}
+
+		if ( (PMC->PMC_MCKR & PMC_MCKR_PRES_Msk) == PMC_MCKR_PRES_CLK_3 ) {
+			SystemCoreClock /= 3U;
+		}
+		else {
+			SystemCoreClock >>= ((PMC->PMC_MCKR & PMC_MCKR_PRES_Msk) >> PMC_MCKR_PRES_Pos);
+		}
+		
+		this->MasterFreq = SystemCoreClock;
 	}
 	
-	return SystemCoreClock;
+	return this->MasterFreq;
 }
 
 uint32_t samClock_c::MainFreqMeasure(bool wait) {

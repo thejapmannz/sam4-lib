@@ -23,17 +23,25 @@
 #include "CircBuf.h"
 #include "serial-funcs.h"
 
-//Parameters and options for functions:
+
+// Defined options for function arguments:
 enum {usart_modeSerialSynch, usart_modeSerialAsync, usart_modeManchester};
+
 
 //Use options from only one group of the following, as relevant for your selected mode:
 
-enum {usart_optionSynchClockLocalAlways = 0x01, usart_optionSynchClockLocalTx = 0x02, usart_optionSynchClockRemote = 0x04, usart_optionSynchMSBFirst = 0x08};
+//For synchronous serial mode:
+enum {usart_optionSynchClockLocal = 0x00, usart_optionSynchClockRemote = 0x01,
+	usart_optionSynchMSBFirst = 0x10,
+	usart_optionSynchInvertData = 0x20};
 
-enum {usart_optionAsync8xSample = 0x10, 
-	usart_optionAsyncMSBFirst = 0x20, 
+//For asynchronous serial (UART) mode:
+enum {usart_optionAsync8xSample = 0x10, // 8 samples per bit instead of 16. Higher bauds => use synch mode.
+	usart_optionAsyncMSBFirst = 0x20,
+	usart_optionAsyncInvertData = 0x40,
 	usart_optionAsyncParityNone = 0x04, usart_optionAsyncParityEven = 0x00, usart_optionAsyncParityOdd = 0x01, usart_optionAsyncParityMark = 0x03, usart_optionAsyncParitySpace = 0x02};
 
+//For Manchester mode:
 enum {usart_optionManchesterPositive = 0x01, usart_optionManchesterNegative = 0x02};
 
 
