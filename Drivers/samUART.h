@@ -10,8 +10,8 @@
 #define SAMUART_H_
 
 #include "sam.h"
-#include "CircBuf.h"
-#include "serial-funcs.h"
+#include "../Utilities/CircBuf.h"
+#include "../Utilities/serial-funcs.h"
 
 enum {uart_parityEven, uart_parityOdd, uart_parityMark, uart_paritySpace, uart_parityNone};
 

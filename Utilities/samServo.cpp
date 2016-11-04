@@ -8,8 +8,8 @@
 
 
 #include "sam.h"
-#include "samClock.h"
-#include "samPWM.h"
+#include "../Drivers/samClock.h"
+#include "../Drivers/samPWM.h"
 
 //extern samClock_c samClock;
 //extern pwmCore_c pwmCore;

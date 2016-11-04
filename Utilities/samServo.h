@@ -12,7 +12,7 @@
 #define SAMSERVO_H_
 
 #include "sam.h"
-#include "samPWM.h"
+#include "../Drivers/samPWM.h"
 
 class samServo_c {
 	public:
