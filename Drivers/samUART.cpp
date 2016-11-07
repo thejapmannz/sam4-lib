@@ -6,16 +6,15 @@
  */ 
 
 #include "sam.h"
-#include "samClock.h"
-extern samClock_c samClock;
+#include "samClock.hpp"
 
 samUART_c::samUART_c(int id) {
-	samUART_c::channel_id = id;
+	this->channel_id = id;
 	if (id) {
-		samUART_c::base_id = UART1;
+		this->base_id = UART1;
 	}
 	else {
-		samUART_c::base_id = UART0;
+		this->base_id = UART0;
 	}
 }
 

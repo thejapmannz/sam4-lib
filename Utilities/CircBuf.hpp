@@ -1,20 +1,24 @@
 /*
- * CircBuf.h
- * FIFO Circular Buffer with overwrite-oldest on full buffer.
+ * CircBuf.hpp
+ * FIFO Circular Buffer with overwrite-oldest-on-full.
  * Based on an implementation by GitHub's yagihiro.
- * Fixed size, as MALLOC refuses to compile under Atmel Studio.
  *
- * Created: 14/05/2016 5:45:18 PM
- *  Author: Ben Jones
+ * TODO: Make malloc or new compile under Atmel Studio, 
+ *  and add variable size support.
+ *
+ * Created: 14/05/2016
+ * Modified: 04/11/2016
+ * Author: Ben Jones
  */ 
 
-#ifndef CIRCBUF_H_
-#define CIRCBUF_H_
+#ifndef CIRCBUF_HPP_
+#define CIRCBUF_HPP_
 
 //Change this to change the buffer's data type and size.
-typedef uint8_t data_t;
+//typedef uint8_t data_t;
 #define BUFF_SIZE 256
 
+template <class data_t> 
 class CircBuf_c {
 	public:
 		//Initialiser:
@@ -34,8 +38,9 @@ class CircBuf_c {
 		uint32_t readPtr;
 		uint32_t writePtr;
 		uint32_t count;
+		//uint32_t buffSize;
 };
 
 #include "CircBuf.cpp"
 
-#endif /* CIRCBUF_H_ */
+#endif /* CIRCBUF_HPP_ */

@@ -7,10 +7,8 @@
  *  Author: Ben Jones
  */ 
 
-//#include "samGPIO.h"
-#include "samClock.h"
-extern samClock_c samClock;
 #include "sam.h"
+#include "samClock.hpp"
 
 
 gpioPort_c::gpioPort_c(char port) {

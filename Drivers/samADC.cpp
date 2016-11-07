@@ -6,7 +6,7 @@
  */ 
 
 #include "sam.h"
-#include "samClock.h"
+#include "samClock.hpp"
 extern samClock_c samClock;
 
 //ADC clock to aim for:

@@ -1,17 +1,28 @@
 /*
- * arduino_funcs.h
- * Copied from Arduino libraries...
+ * arduino_funcs.hpp
+ * Copied from Arduino libraries. Uses templates so functions 
+ *   can be applied to all types with full accuracy.
+ *
  * Created: 25/05/2016 4:06:06 PM
  *  Author: Ben Jones
  */ 
 
 
-#ifndef ARDUINO_FUNCS_H_
-#define ARDUINO_FUNCS_H_
+#ifndef ARDUINO_FUNCS_HPP_
+#define ARDUINO_FUNCS_HPP_
 
-long ardu_map(long x, long in_min, long in_max, long out_min, long out_max);
-long ardu_constrain(const long x, const long a, const long b);
+template <typename num>
+inline num ardu_map(num x, num in_min, num in_max, num out_min, num out_max);
+
+template <typename num>
+inline num ardu_min(num x, num y);
+
+template <typename num>
+inline num ardu_max(num x, num y);
+
+template <typename num>
+inline num ardu_constrain(num x, num xmin, num xmax);
 
 #include "arduino-funcs.cpp"
 
-#endif /* ARDUINO_FUNCS_H_ */
+#endif /* ARDUINO_FUNCS_HPP_ */

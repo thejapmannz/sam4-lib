@@ -1,13 +1,13 @@
 /*
- * samADC.h
+ * samADC.hpp
  *
  * Created: 29/05/2016 9:50:00 PM
  *  Author: Ben Jones
  */ 
 
 
-#ifndef SAMADC_H_
-#define SAMADC_H_
+#ifndef SAMADC_HPP_
+#define SAMADC_HPP_
 
 #include "sam.h"
 
@@ -51,4 +51,4 @@ class samADC_c {
 //Global declaration:
 extern samADC_c samADC;
 
-#endif /* SAMADC_H_ */
+#endif /* SAMADC_HPP_ */

@@ -1,5 +1,5 @@
 /*
- * samServo.h
+ * samServo.hpp
  * Abstraction layer for hardware PWM control of servos.
  * Based on the Arduino style, and intended to be a drop-in replacement.
  *
@@ -8,11 +8,11 @@
  */ 
 
 
-#ifndef SAMSERVO_H_
-#define SAMSERVO_H_
+#ifndef SAMSERVO_HPP_
+#define SAMSERVO_HPP_
 
 #include "sam.h"
-#include "../Drivers/samPWM.h"
+#include "../Drivers/samPWM.hpp"
 
 class samServo_c {
 	public:
@@ -36,4 +36,4 @@ class samServo_c {
 
 #include "samServo.cpp"
 
-#endif /* SAMSERVO_H_ */
+#endif /* SAMSERVO_HPP_ */

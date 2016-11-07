@@ -8,11 +8,9 @@
 
 
 #include "sam.h"
-#include "../Drivers/samClock.h"
-#include "../Drivers/samPWM.h"
+#include "../Drivers/samClock.hpp"
+#include "../Drivers/samPWM.hpp"
 
-//extern samClock_c samClock;
-//extern pwmCore_c pwmCore;
 
 void samServo_c::attach(pwmChannel_c* channel, bool overdrive) {
 	//Starts PWM on given channel, with frequency at 50Hz, 

@@ -7,7 +7,7 @@
  */ 
 
 #include "sam.h"
-#include "samClock.h"
+#include "samClock.hpp"
 
 
 //Initialiser: sets up peripheral. Use bitwise OR for multiple options.

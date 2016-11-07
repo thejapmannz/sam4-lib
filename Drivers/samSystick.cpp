@@ -6,11 +6,8 @@
  */ 
 
 #include "sam.h"
-//#include "samSystick.h"
-#include "samGPIO.h"
-extern gpioPort_c gpioA;
-#include "samClock.h"
-extern samClock_c samClock;
+#include "samGPIO.hpp"
+#include "samClock.hpp"
 
 
 

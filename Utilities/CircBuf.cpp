@@ -2,7 +2,9 @@
  * CircBuf.cpp
  * FIFO Circular Buffer with overwrite-oldest on full buffer.
  * Based on an implementation by GitHub's yagihiro.
- * Fixed size, as MALLOC refuses to compile under Atmel Studio.
+ *
+ * TODO: Make malloc or new compile under Atmel Studio,
+ *  and add variable size support.
  *
  * Created: 14/05/2016 5:56:04 PM
  *  Author: Ben Jones
@@ -10,19 +12,23 @@
 
 #include "sam.h"
 
-CircBuf_c::CircBuf_c(void) {
+template <class data_t>
+CircBuf_c<data_t>::CircBuf_c(void) {
+	//Initialise array:
+	//this->bufPtr = (data_t *) malloc(BUFF_SIZE);
 	//Initialise buffer's other values.
-	CircBuf_c::readPtr = 0;
-	CircBuf_c::writePtr = 0;
-	CircBuf_c::count = 0;
+	this->readPtr = 0;
+	this->writePtr = 0;
+	this->count = 0;
 }
 
-void CircBuf_c::Push(data_t data) {
+template <class data_t>
+void CircBuf_c<data_t>::Push(data_t data) {
 	//Add one value to buffer.
 	
-	CircBuf_c::bufPtr[CircBuf_c::writePtr++] = data;
-	if (CircBuf_c::writePtr >= BUFF_SIZE) {
-		CircBuf_c::writePtr = 0;
+	this->bufPtr[this->writePtr++] = data;
+	if (this->writePtr >= BUFF_SIZE) {
+		this->writePtr = 0;
 	}
 
 	// Overflow handled by overwriting oldest data.
@@ -33,23 +39,25 @@ void CircBuf_c::Push(data_t data) {
 		}
 	}
 	else {
-		CircBuf_c::count++;
+		this->count++;
 	}
 }
 
-data_t CircBuf_c::Pop(void) {
+template <class data_t>
+data_t CircBuf_c<data_t>::Pop(void) {
 	//Read one value from buffer.
 	data_t read_data = 0;
-	if (CircBuf_c::count) {
-		read_data = CircBuf_c::bufPtr[CircBuf_c::readPtr++];
-		if (CircBuf_c::readPtr >= BUFF_SIZE) {
-			CircBuf_c::readPtr = 0;
+	if (this->count) {
+		read_data = this->bufPtr[this->readPtr++];
+		if (this->readPtr >= BUFF_SIZE) {
+			this->readPtr = 0;
 		}
-		CircBuf_c::count--;
+		this->count--;
 	}
 	return read_data;
 }
 
-uint32_t CircBuf_c::Available(void) {
-	return CircBuf_c::count;
+template <class data_t>
+uint32_t CircBuf_c<data_t>::Available(void) {
+	return this->count;
 }

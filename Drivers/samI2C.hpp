@@ -1,5 +1,5 @@
 /*
- * samI2C.h - TWI/I2C peripheral driver.
+ * samI2C.hpp - TWI/I2C peripheral driver.
  * Main routines copied from Atmel C files, and 
  * rewritten into C++ format.
  *
@@ -8,8 +8,8 @@
  */ 
 
 
-#ifndef SAMI2C_H_
-#define SAMI2C_H_
+#ifndef SAMI2C_HPP_
+#define SAMI2C_HPP_
 
 // Instances are samTWI0 and samTWI1.
 
@@ -92,4 +92,4 @@ class samI2C_c {
 extern samI2C_c samTWI0;
 extern samI2C_c samTWI1;
 
-#endif /* SAMI2C_H_ */
+#endif /* SAMI2C_HPP_ */

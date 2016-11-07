@@ -7,8 +7,7 @@
 
 
 #include "sam.h"
-#include "samClock.h"
-extern samClock_c samClock;
+#include "samClock.hpp"
 
 /* General i2c info:
 

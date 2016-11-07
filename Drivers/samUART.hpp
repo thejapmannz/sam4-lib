@@ -1,17 +1,17 @@
 /*
- * samUART.h
+ * samUART.hpp
  *
  * Created: 8/05/2016 12:46:29 PM
  *  Author: Ben Jones
  */ 
 
 
-#ifndef SAMUART_H_
-#define SAMUART_H_
+#ifndef SAMUART_HPP_
+#define SAMUART_HPP_
 
 #include "sam.h"
-#include "../Utilities/CircBuf.h"
-#include "../Utilities/serial-funcs.h"
+#include "../Utilities/CircBuf.hpp"
+#include "../Utilities/serial-funcs.hpp"
 
 enum {uart_parityEven, uart_parityOdd, uart_parityMark, uart_paritySpace, uart_parityNone};
 
@@ -41,8 +41,8 @@ class samUART_c: public SerialStream {
 		
 		bool channel_id; // Channel can be 0 or 1 on SAM4S.
 		Uart* base_id; // Base address for peripheral.
-		CircBuf_c recieveBuffer;
-		CircBuf_c transmitBuffer;
+		CircBuf_c<uint8_t> recieveBuffer;
+		CircBuf_c<uint8_t> transmitBuffer;
 };
 
 #include "samUART.cpp"
@@ -51,4 +51,4 @@ class samUART_c: public SerialStream {
 extern samUART_c samUART0;
 extern samUART_c samUART1;
 
-#endif /* SAMUART_H_ */
+#endif /* SAMUART_HPP_ */

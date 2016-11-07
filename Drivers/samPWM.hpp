@@ -1,5 +1,5 @@
 /*
- * samPWM.h
+ * samPWM.hpp
  * API for PWM peripheral.
  * Some code copied from Michael Hayes' code.
  *
@@ -7,8 +7,8 @@
  *  Author: Ben Jones
  */ 
 
-#ifndef SAMPWM_H_
-#define SAMPWM_H_
+#ifndef SAMPWM_HPP_
+#define SAMPWM_HPP_
 
 #include "sam.h"
 
@@ -92,4 +92,4 @@ extern pwmChannel_c pwmChannel1;
 extern pwmChannel_c pwmChannel2;
 extern pwmChannel_c pwmChannel3;
 
-#endif /* SAMPWM_H_ */
+#endif /* SAMPWM_HPP_ */

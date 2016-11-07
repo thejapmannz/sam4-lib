@@ -1,5 +1,5 @@
 /*
- * samUSART.h
+ * samUSART.hpp
  * API for synchronous-asynchronous serial peripheral. Based on Arduino style.
  *
  * Created: 2/07/2016 5:55:22 PM
@@ -16,12 +16,12 @@
 // extern samUSART_c samUSART1;
 
 
-#ifndef SAMUSART_H_
-#define SAMUSART_H_
+#ifndef SAMUSART_HPP_
+#define SAMUSART_HPP_
 
 #include "sam.h"
-#include "../Utilities/CircBuf.h"
-#include "../Utilities/serial-funcs.h"
+#include "../Utilities/CircBuf.hpp"
+#include "../Utilities/serial-funcs.hpp"
 
 
 // Defined options for function arguments:
@@ -75,8 +75,8 @@ class samUSART_c: public SerialStream {
 		//State variables:
 		int ch_id;
 		Usart* base;
-		CircBuf_c recieveBuffer;
-		CircBuf_c transmitBuffer;
+		CircBuf_c<uint8_t> recieveBuffer;
+		CircBuf_c<uint8_t> transmitBuffer;
 	
 };
 
@@ -86,4 +86,4 @@ class samUSART_c: public SerialStream {
 extern samUSART_c samUSART0;
 extern samUSART_c samUSART1;
 
-#endif /* SAMUSART_H_ */
+#endif /* SAMUSART_HPP_ */

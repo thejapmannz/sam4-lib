@@ -1,13 +1,13 @@
 /*
- * samSystick.h
+ * samSystick.hpp
  *
  * Created: 8/05/2016 9:00:00 PM
  *  Author: Ben Jones
  */ 
 
 
-#ifndef SAMSYSTICK_H_
-#define SAMSYSTICK_H_
+#ifndef SAMSYSTICK_HPP_
+#define SAMSYSTICK_HPP_
 
 #include "sam.h"
 
@@ -34,4 +34,4 @@ class samSysTick_c {
 //Global declaration:
 extern samSysTick_c samSysTick;
 
-#endif /* SAMSYSTICK_H_ */
+#endif /* SAMSYSTICK_HPP_ */

@@ -1,5 +1,5 @@
 /*
- * samClock.h
+ * samClock.hpp
  * Routines for managing the SAM4S clock generators.
  *
  * Created: 4/05/2016 10:09:51 AM
@@ -7,8 +7,8 @@
  */ 
 
 
-#ifndef INCSAMCLOCK_H
-#define INCSAMCLOCK_H
+#ifndef INCSAMCLOCK_HPP
+#define INCSAMCLOCK_HPP
 
 #include "sam.h"
 
@@ -84,4 +84,4 @@ class samClock_c {
 //Global declaration:
 extern samClock_c samClock;
 
-#endif /* INCSAMCLOCK_H */
+#endif /* INCSAMCLOCK_HPP */

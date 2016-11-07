@@ -1,5 +1,5 @@
 /*
- * samGPIO.h
+ * samGPIO.hpp
  * Generic GPIO high/low/input/pullup driver, similar to Arduino style.
  *
  * Created: 4/05/2016 8:50:55 PM
@@ -7,8 +7,8 @@
  */ 
 
 
-#ifndef SAMGPIO_H_
-#define SAMGPIO_H_
+#ifndef SAMGPIO_HPP_
+#define SAMGPIO_HPP_
 
 #include "sam.h"
 
@@ -34,7 +34,8 @@ class gpioPort_c {
 		bool PinReadSetVal(uint32_t pin);
 		//Set pin driving state. From options enumerated above.
 		void PinMode(uint32_t pin, uint32_t mode);
-		
+	
+	private:
 		char port_id;
 		Pio* base;
 };
@@ -45,4 +46,4 @@ class gpioPort_c {
 extern gpioPort_c gpioA;
 extern gpioPort_c gpioB;
 
-#endif /* SAMGPIO_H_ */
+#endif /* SAMGPIO_HPP_ */
