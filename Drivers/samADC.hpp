@@ -30,7 +30,8 @@ class samADC_c {
 		//Initialiser: Sets up clock, trigger modes, etc.
 		void Begin(int32_t mode, uint32_t gain);
 		
-		//Enable and disable conversion for a given channel.
+		//Enable and disable a given channel. This enables both conversion of 
+		//    a channel and the GPIO control of a channel's pin!
 		// Note there is only 1 ADC at 1MSa, so 2 channels means 500kSa, etc.
 		void channelEnable(uint8_t channel);
 		void channelDisable(uint8_t channel);
