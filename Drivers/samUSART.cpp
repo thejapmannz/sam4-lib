@@ -11,10 +11,10 @@
 
 
 //Initialiser: sets up peripheral. Use bitwise OR for multiple options.
-void samUSART_c::Begin(uint32_t mode, uint32_t baud_clockrate, uint32_t options) {
+void samUSART_c::Begin(uint32_t mode, uint32_t baud_clockrate, uint32_t parity, uint32_t options) {
 	
 	//Disable and reset:
-	this->base->US_IDR = 0xFFFFFFFF; // Disable all interrupts
+	this->base->US_IDR = ~0UL; // Disable all interrupts
 	this->base->US_MR = 0;
 	this->base->US_CR = US_CR_RSTRX | US_CR_RSTTX | US_CR_RXDIS | US_CR_TXDIS | US_CR_RSTSTA;
 	this->base->US_BRGR = 0;
@@ -25,14 +25,10 @@ void samUSART_c::Begin(uint32_t mode, uint32_t baud_clockrate, uint32_t options)
 	
 	switch (mode) {
 		case usart_modeSerialAsync: // Set up to be a UART.
-			//Clock generator: need 8-16x oversampling from baudrate. Faster speeds => use synch mode.
-			if (options & usart_optionAsync8xSample) {
-				clockDivider /= 8;
-				this->base->US_MR |= US_MR_OVER;
-			}
-			else {
-				clockDivider /= 16;
-			}
+			//Clock generator: need 16x oversampling from baudrate. Faster speeds => use synch mode.
+			clockDivider /= 16;
+			
+			//Options:
 			if (options & usart_optionAsyncMSBFirst) {
 				this->base->US_MR |= US_MR_MSBF;
 			}
@@ -42,7 +38,7 @@ void samUSART_c::Begin(uint32_t mode, uint32_t baud_clockrate, uint32_t options)
 			
 			//Mode register: Asynchronous, internal clock for all, 8-bit for UART.
 			this->base->US_MR |= US_MR_USART_MODE_NORMAL | US_MR_CHRL_8_BIT | US_MR_USCLKS_MCK | 
-				US_MR_PAR(options & 0x0f) | US_MR_CHMODE_NORMAL | US_MR_NBSTOP_1_BIT;
+				US_MR_PAR(parity) | US_MR_NBSTOP_1_BIT;
 				
 			break;
 		
@@ -58,6 +54,7 @@ void samUSART_c::Begin(uint32_t mode, uint32_t baud_clockrate, uint32_t options)
 				this->base->US_MR |= US_MR_USCLKS_MCK | US_MR_CLKO;
 			}
 			
+			//Options:
 			if (options & usart_optionSynchMSBFirst) {
 				this->base->US_MR |= US_MR_MSBF;
 			}
@@ -67,12 +64,33 @@ void samUSART_c::Begin(uint32_t mode, uint32_t baud_clockrate, uint32_t options)
 			
 			//Mode register: Synchronous, 8-bit for UART, external/internal clock.
 			this->base->US_MR |= US_MR_USART_MODE_NORMAL | US_MR_CHRL_8_BIT | US_MR_SYNC | 
-				US_MR_PAR(options & 0x0f) | US_MR_CHMODE_NORMAL | US_MR_NBSTOP_1_BIT;
+				US_MR_PAR(parity) | US_MR_NBSTOP_1_BIT;
 				
 			break;
 		
 		case usart_modeManchester: // Manchester encoded signal (clockless).
-			//
+			uint32_t parameter;
+			
+			//Clock generator: use 16x oversampling, and drift compensation!
+			clockDivider /= 16;
+			this->base->US_MAN |= US_MAN_DRIFT | US_MAN_ONE;
+			
+			//Preamble:
+			parameter = (options & 0xf00) >> 2;
+			this->base->US_MAN |= US_MAN_TX_PL(parameter) | US_MAN_RX_PL(parameter);
+			parameter = (options & 0xf0) >> 1;
+			this->base->US_MAN |= US_MAN_TX_PP(parameter) | US_MAN_RX_PP(parameter);
+			
+			//Polarity:
+			if (options & usart_optionManchInvertPolarity)
+				this->base->US_MAN |= US_MAN_TX_MPOL | US_MAN_RX_MPOL;
+			if (options & usart_optionManchInvertStartbit)
+				this->base->US_MR |= US_MR_MODSYNC;
+			
+			//USART main register:
+			this->base->US_MR |= US_MR_USART_MODE_NORMAL | US_MR_CHRL_8_BIT | 
+				US_MR_PAR(parity) | US_MR_NBSTOP_1_BIT | US_MR_MAN | US_MR_ONEBIT;
+			
 			break;
 			
 		default:
