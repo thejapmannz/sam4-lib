@@ -10,16 +10,18 @@
  *  Author: Ben Jones
  */ 
 
-#include "sam.h"
+//#include "stdlib.h"
 
 template <class data_t>
 CircBuf_c<data_t>::CircBuf_c(void) {
 	//Initialise array:
-	//this->bufPtr = (data_t *) malloc(BUFF_SIZE);
+	//this->bufPtr = (data_t*) malloc(sizeof(data_t) * buffSize;
+	
 	//Initialise buffer's other values.
 	this->readPtr = 0;
 	this->writePtr = 0;
 	this->count = 0;
+	//this->buffSize = buffSize;
 }
 
 template <class data_t>

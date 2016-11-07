@@ -14,8 +14,7 @@
 #ifndef CIRCBUF_HPP_
 #define CIRCBUF_HPP_
 
-//Change this to change the buffer's data type and size.
-//typedef uint8_t data_t;
+//Change this to change the buffer's and size - due to Malloc issues :(
 #define BUFF_SIZE 256
 
 template <class data_t> 
@@ -35,6 +34,7 @@ class CircBuf_c {
 	
 	private:
 		data_t bufPtr[BUFF_SIZE];
+		//data_t* bufPtr;
 		uint32_t readPtr;
 		uint32_t writePtr;
 		uint32_t count;
