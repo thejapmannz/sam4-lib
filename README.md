@@ -21,32 +21,8 @@ Copy-paste this into a blank Atmel Studio project's main file.
 //////////////////////////////////////////////////////////////////////////
 //Includes and shared classes:
 #include "sam.h"
-#include "../../sam4-lib/arduino-funcs.h"
-#include "../../sam4-lib/samClock.h"
-#include "../../sam4-lib/samGPIO.h"
-#include "../../sam4-lib/samPWM.h"
-#include "../../sam4-lib/samServo.h"
-#include "../../sam4-lib/samSystick.h"
-#include "../../sam4-lib/samI2C.h"
-#include "../../sam4-lib/samUART.h"
-#include "../../sam4-lib/samADC.h"
-#include "../../sam4-lib/samUSART.h"
+#include "../../sam4-lib/sam4-lib.hpp"
 
-// extern samClock_c samClock;
-// extern gpioPort_c gpioA;
-// extern gpioPort_c gpioB;
-// extern pwmCore_c pwmCore;
-// extern pwmChannel_c pwmChannel0;
-// extern pwmChannel_c pwmChannel1;
-// extern pwmChannel_c pwmChannel2;
-// extern pwmChannel_c pwmChannel3;
-// extern samSysTick_c samSysTick;
-// extern samI2C_c samTWI0;
-// extern samUART_c samUART0;
-// extern samUART_c samUART1;
-// extern samADC_c samADC;
-// extern samUSART_c samUSART0;
-// extern samUSART_c samUSART1;
 
 #define led0 20   //PA20
 #define led1 21   //PA21
