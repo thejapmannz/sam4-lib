@@ -6,60 +6,52 @@
  */ 
 
 #include "sam.h"
-#include "samGPIO.hpp"
 #include "samClock.hpp"
+#include "../Utilities/arduino-funcs.hpp"
 
 
-
-void samSysTick_c::Begin(uint32_t frequency, int32_t ledDebug) {
+void samSysTick_c::Begin(uint32_t sysTickFrequency) {
 	//Resets systick and assigns given frequency.
-	SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk; // Disable temporarily, if running
-	uint32_t ticks = samClock.MasterFreqGet() / frequency;
-	if (ticks > 0x01000000) {
-		ticks = 0x01000000; // Max 24-bit counter, and -1 later.
-	}
+	SysTick->CTRL = 0; // Disable temporarily, if running
+	
+	uint32_t ticks = samClock.MasterFreqGet() / (8 * sysTickFrequency); // SAM4 provides reference clock at MCK/8.
+	ticks = ardu_constrain(ticks, 1UL, 1UL << 24);
+	
 	SysTick->LOAD = ticks - 1; // Load value. Note flag set when counting 1->0, so -1 ticks.
 	SysTick->VAL = 0; // Reset counter
-	SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk | SysTick_CTRL_ENABLE_Msk; // Enable
-	
-	samSysTick_c::ledDebug = ledDebug;
-	if (ledDebug >= 0) {
-		gpioA.PinSetLow(ledDebug);
-		gpioA.PinMode(ledDebug, gpioOutput);
-	}
+	SysTick->CTRL = SysTick_CTRL_ENABLE_Msk | SysTick_CTRL_TICKINT_Msk; // Enable, including interrupts
+	NVIC_EnableIRQ(SysTick_IRQn);
 }
 
-void samSysTick_c::FreqSet(uint32_t frequency) {
+
+void samSysTick_c::FreqSet(uint32_t sysTickFrequency) {
 	//Changes systick frequency without resetting counter.
-	uint32_t ticks = samClock.MasterFreqGet() / frequency;
-	if (ticks > 0x00ffffff) {
-		ticks = 0x00ffffff; // Max 24-bit counter!
-	}
+	uint32_t ticks = samClock.MasterFreqGet() / (8 * sysTickFrequency); // SAM4 provides reference clock at MCK/8.
+	ticks = ardu_constrain(ticks, 1UL, 1UL << 24);
 	SysTick->LOAD = ticks - 1; // Load value. Note flag set when counting 1->0, so -1 ticks.
 }
+
 uint32_t samSysTick_c::FreqGet(void) {
 	//Returns frequency of systick triggers.
-	return (samClock.MasterFreqGet() / SysTick->LOAD);
+	return (samClock.MasterFreqGet() * 8 / SysTick->LOAD);
 }
+
 
 void samSysTick_c::Wait(void) {
 	//Waits for SysTick counter flag to be set.
-	
-	if (samSysTick_c::ledDebug) {
-		gpioA.PinSetLow(ledDebug);
-		//Wait for flag:
-		while(!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)) {
-			continue;
-		}
-		gpioA.PinSetHigh(ledDebug);
-	}
-	else {
-		//Wait for flag:
-		while(!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)) {
-			continue;
-		}
+	while(!(SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk)) {
+		__WFI(); // halt CPU clock until interrupt occurs
+		continue;
 	}
 }
 
+
 // Global definition:
 samSysTick_c samSysTick;
+
+
+// Empty interrupt handler - only needed so that the interrupt address 
+// is not Null. Feel free to comment-out and use for other purposes!
+void SysTick_Handler(void) {
+	return;
+}

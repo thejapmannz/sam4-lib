@@ -13,6 +13,8 @@
 #include "../Utilities/CircBuf.hpp"
 #include "../Utilities/serial-funcs.hpp"
 
+#define UART_BUFF_LENGTH 256
+
 enum {uart_parityEven, uart_parityOdd, uart_parityMark, uart_paritySpace, uart_parityNone};
 
 class samUART_c: public SerialStream {
@@ -41,8 +43,8 @@ class samUART_c: public SerialStream {
 		
 		bool channel_id; // Channel can be 0 or 1 on SAM4S.
 		Uart* base_id; // Base address for peripheral.
-		CircBuf_c<uint8_t> recieveBuffer;
-		CircBuf_c<uint8_t> transmitBuffer;
+		CircBuf_c<uint8_t, UART_BUFF_LENGTH> recieveBuffer;
+		CircBuf_c<uint8_t, UART_BUFF_LENGTH> transmitBuffer;
 };
 
 #include "samUART.cpp"

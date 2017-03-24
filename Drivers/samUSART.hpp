@@ -3,7 +3,7 @@
  * API for synchronous-asynchronous serial peripheral. Based on Arduino style.
  *
  * This implementation is far from complete; the USART contains a LOT of options. 
- * Only the most commonly used options are implemented in code.
+ * Only the most commonly used protocols are implemented in code.
  *
  * TODO list:
  *     - Add SPI mode support
@@ -21,6 +21,8 @@
 #include "../Utilities/CircBuf.hpp"
 #include "../Utilities/serial-funcs.hpp"
 
+
+#define USART_BUFF_LENGTH 256
 
 // Defined options for function arguments:
 enum {usart_modeSerialSynch, usart_modeSerialAsync, usart_modeManchester};
@@ -77,8 +79,8 @@ class samUSART_c: public SerialStream {
 		//State variables:
 		int ch_id;
 		Usart* base;
-		CircBuf_c<uint8_t> recieveBuffer;
-		CircBuf_c<uint8_t> transmitBuffer;
+		CircBuf_c<uint8_t, USART_BUFF_LENGTH> recieveBuffer;
+		CircBuf_c<uint8_t, USART_BUFF_LENGTH> transmitBuffer;
 	
 };
 

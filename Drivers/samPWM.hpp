@@ -2,6 +2,9 @@
  * samPWM.hpp
  * API for PWM peripheral.
  * Some code copied from Michael Hayes' code.
+ * 
+ * TODO: Add automatic control of PWMCore from PWMChannels, 
+ *  to minimise user complication.
  *
  * Created: 4/05/2016 8:11:39 PM
  *  Author: Ben Jones
@@ -19,8 +22,8 @@
 // extern pwmChannel_c pwmChannel2;
 // extern pwmChannel_c pwmChannel3;
 
-// See SAM4S datasheet, page 40, for listing of PWM pins, 
-// there are too many to list here. 
+// See SAM4S datasheet, approx page 52, for listing of peripheral 
+// pin mapping, there are too many options to list here. 
 
 
 //An API for the core PWM peripheral, including the main clock:
@@ -44,10 +47,11 @@ class pwmCore_c {
 
 class pwmChannel_c {
 	public:
-		//Class initialiser, allows 4 instances of pwmChannel to be made from h file:
+		//Class initialiser, allows 4 instances of pwmChannel to be made from .h file:
 		pwmChannel_c(int id);
+		
 		//Initialise channel. Clock is either peripheral clock (div1), peripheral
-		//  clock divided (div2 thru div1024) or the core's clock A or B.
+		//  clock divided (div2 thru div1024) or the PWMcore's clock A or B.
 		// Remember to set relevant GPIO pin to use peripheral - this is not done
 		//  here as there are too many pins we can output on.
 		enum {ch_div1, ch_div2, ch_div4, ch_div8, ch_div16, ch_div32, ch_div64,
@@ -64,7 +68,7 @@ class pwmChannel_c {
 		
 		//Functions relating to duty. Note 16-bit counter.
 		void DutySet(uint16_t duty_ticks);
-		void DutySet_16(uint16_t duty_ratio);
+		void DutySet_16(uint16_t duty_ratio); // Sets duty as 'percentage' in range 0-65535
 		void DutySet_us(uint32_t duty_us);
 		uint16_t DutyGet(void);
 		uint16_t DutyGet_16(void);

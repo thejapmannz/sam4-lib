@@ -51,10 +51,12 @@ void samI2C_c::Begin(uint32_t mode, uint8_t hostAddress, uint32_t speed_kHz) {
 	
 	// Set up clock generator.
 	samI2C_c::clockSetup(speed_kHz * 1000);
-	if (samI2C_c::channelNumber)
+	if (samI2C_c::channelNumber) {
 		samClock.PeriphClockEnable(ID_TWI1);
-	else
+	}
+	else {
 		samClock.PeriphClockEnable(ID_TWI0);
+	}
 			
 	//Set up host address.
 	samI2C_c::TWIbase->TWI_SMR = TWI_SMR_SADR(hostAddress>>1);
@@ -93,19 +95,23 @@ int32_t samI2C_c::MasterReadBytes(uint8_t slaveAddress, uint32_t internalAddress
     uint8_t *data = buffer;
     int32_t ret;
 
-    if (numBytes == 0)
+    if (numBytes == 0) {
         return 0;
-	 
-	if (intlAddrLen < 0 || intlAddrLen > 3)
+	}
+	
+	if (intlAddrLen < 0 || intlAddrLen > 3) {
 		intlAddrLen = samI2C_c::addressLength(internalAddress);
+	}
     /* The flowchart Fig 33-17 suggests this order for MMR and IADR.  */
 	samI2C_c::TWIbase->TWI_MMR = TWI_MMR_DADR (slaveAddress >> 1) | TWI_MMR_IADRSZ(intlAddrLen) | TWI_MMR_MREAD;
     samI2C_c::TWIbase->TWI_IADR = internalAddress;
 
-    if (numBytes == 1)
+    if (numBytes == 1) {
         samI2C_c::TWIbase->TWI_CR = TWI_CR_START | TWI_CR_STOP;
-    else
+	}
+    else {
         samI2C_c::TWIbase->TWI_CR = TWI_CR_START;
+	}
 
     /* The slave address and optional internal address is sent. 
        Each sent byte should be acknowledged.  See Figure 33-20
@@ -113,8 +119,9 @@ int32_t samI2C_c::MasterReadBytes(uint8_t slaveAddress, uint32_t internalAddress
 
     for (i = 0; i < numBytes; i++) {
         /* The master does not acknowledge receipt of the last byte.  */
-        if ((i == numBytes - 1) && (numBytes > 1))
+        if ((i == numBytes - 1) && (numBytes > 1)) {
             samI2C_c::TWIbase->TWI_CR = TWI_CR_STOP;
+		}
 
         ret = samI2C_c::MasterWaitAck(false);
         if (ret < 0) {

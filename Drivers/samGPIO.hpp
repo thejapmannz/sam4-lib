@@ -15,25 +15,40 @@
 //Global instances are gpioA and gpioB (no port C on sam4s8b).
 
 //The following options are available for the pinMode function:
-enum {gpioOutput, gpioOutputOpenDrain, gpioInput, gpioInputPullup, gpioInputPulldown, 
-		gpioPeriphA, gpioPeriphAPullup, gpioPeriphB, gpioPeriphBPullup, 
-		gpioPeriphC, gpioPeriphCPullup, gpioPeriphD, gpioPeriphDPullup};
+enum {gpio_modeOutput, 
+	gpio_modeInput, 
+	gpio_modePeriphA, 
+	gpio_modePeriphB, 
+	gpio_modePeriphC, 
+	gpio_modePeriphD
+	};
+//The following options are available for the pinMode function, 
+//		and can be ORed together for multiple selections.
+enum {gpio_propNormal = 0x00, 
+	gpio_propPullup = 0x01, 
+	gpio_propPulldown = 0x02, 
+	gpio_propSchmittTrig = 0x04, 
+	gpio_propDebounceFilter = 0x08 // Hardware debouncing using slow clock.
+	};
 
 class gpioPort_c {
 	public:
 		//Initialiser:
 		gpioPort_c(char port);
-		//Start the GPIO clock:
+		
+		//Initialise port. Necessary to provide clock to input pins.
 		void Begin(void);
+		//Set pin behaviour, from options enumerated above.
+		void PinMode(uint32_t pin, uint32_t mode, uint32_t properties);
+		
 		//Set output high/low, and faster inline functions.
 		void PinSet(uint32_t pin, bool state);
 		inline void PinSetHigh(uint32_t pin);
 		inline void PinSetLow(uint32_t pin);
+		
 		//Get output state from pin or output registers
 		bool PinRead(uint32_t pin);
 		bool PinReadSetVal(uint32_t pin);
-		//Set pin driving state. From options enumerated above.
-		void PinMode(uint32_t pin, uint32_t mode);
 	
 	private:
 		char port_id;
@@ -43,7 +58,7 @@ class gpioPort_c {
 #include "samGPIO.cpp"
 
 // Global declaration:
-extern gpioPort_c gpioA;
-extern gpioPort_c gpioB;
+extern gpioPort_c samGPIOA;
+extern gpioPort_c samGPIOB;
 
 #endif /* SAMGPIO_HPP_ */

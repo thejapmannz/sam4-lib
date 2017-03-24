@@ -12,7 +12,7 @@ extern samClock_c samClock;
 //ADC clock to aim for:
 #define adc_clock 20000000
 
-void samADC_c::Begin(int32_t mode, uint32_t gain) {
+void samADC_c::Begin(int32_t mode) {
 	//Sets up the ADC main controls.
 	
 	uint32_t modeRegister = 0;
@@ -47,7 +47,7 @@ void samADC_c::Begin(int32_t mode, uint32_t gain) {
 	//ADC supports per-channel gain, offset, and differential mode.
 	//In future, can set ANACH bit in MR, to allow different gains etc per channel.
 	// For now, just one gain, and leave offsets at 0 and non-differential (COR).
-	ADC->ADC_CGR = ADC_CGR_GAIN0(gain);
+	//ADC->ADC_CGR = ADC_CGR_GAIN0(gain); // Default is zero, for gain of 1.
 	
 	//Enable temperature sensor - little more current drawn, but who cares.
 	ADC->ADC_ACR |= ADC_ACR_TSON;
@@ -57,27 +57,31 @@ void samADC_c::Begin(int32_t mode, uint32_t gain) {
 
 void samADC_c::channelEnable(uint8_t channel) {
 	//Sets relevant bit in channel enable register.
-	if (channel > 15)
-	channel = 15; // Only 16 channels...
+	if (channel > 15) {
+		channel = 15; // Only 16 channels...
+	}
 	ADC->ADC_CHER = (1 << channel);
 }
 void samADC_c::channelDisable(uint8_t channel) {
 	//Sets relevant bit in channel disable register.
-	if (channel > 15)
-	channel = 15; // Only 16 channels...
+	if (channel > 15) {
+		channel = 15; // Only 16 channels...
+	}
 	ADC->ADC_CHDR = (1 << channel);
 }
 
 uint16_t samADC_c::Capture(uint8_t channel) {
 	//Software-triggers ADC, waits for capture, then returns data.
-	if (channel > 15) 
+	if (channel > 15) {
 		channel = 15;
-	
+	}
 	//Enable, to avoid pointlessness and help idiots:
-	this->channelEnable(channel);
+	//this->channelEnable(channel);
+	ADC->ADC_CHER = (1 << channel);
 	
 	//Trigger:
-	this->Trigger();
+	//this->Trigger();
+	ADC->ADC_CR |= ADC_CR_START;
 	
 	//Wait for conversion:
 	uint32_t timeouts = 45000;
@@ -91,8 +95,9 @@ uint16_t samADC_c::Capture(uint8_t channel) {
 uint16_t samADC_c::Read(uint8_t channel) {
 	//Returns last capture for provided channel.
 	// No idiot checks, no disabled channel checks, etc.
-	if (channel > 15)
+	if (channel > 15) {
 		channel = 15; // Only 16 channels...
+	}
 	return ADC->ADC_CDR[channel];
 }
 
@@ -103,9 +108,10 @@ void samADC_c::Trigger(void) {
 
 bool samADC_c::NewDataReady(uint8_t channel) {
 	//Checks interrupt register for new data flag.
-	if (channel > 15) 
+	if (channel > 15) {
 		channel = 15;
-	return (ADC->ADC_ISR & (1 << channel)) != 0;
+	}
+	return ((ADC->ADC_ISR & (1 << channel)) != 0);
 }
 
 //Global definition:

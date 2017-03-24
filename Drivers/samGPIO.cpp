@@ -14,142 +14,128 @@
 gpioPort_c::gpioPort_c(char port) {
 	switch (port) {
 		case 'A':
-			gpioPort_c::base = PIOA;
-			gpioPort_c::port_id = ID_PIOA;
+			this->base = PIOA;
+			this->port_id = ID_PIOA;
 			break;
 		case 'B':
-			gpioPort_c::base = PIOB;
-			gpioPort_c::port_id = ID_PIOB;
+			this->base = PIOB;
+			this->port_id = ID_PIOB;
 			break;
 #ifdef PIOC
 		case 'C':
-			gpioPort_c::base = PIOC;
-			gpioPort_c::port_id = ID_PIOC;
+			this->base = PIOC;
+			this->port_id = ID_PIOC;
 			break;
 #endif
 	}
 }
 
 void gpioPort_c::Begin(void) {
-	//Enables peripheral clock to GPIO.
-	samClock.PeriphClockEnable(gpioPort_c::port_id);
+	//Enables peripheral clock to GPIO. Necessary if using as inputs.
+	samClock.PeriphClockEnable(this->port_id);
 }
 
 void gpioPort_c::PinSet(uint32_t pin, bool state) {
 	//Sets or clears state of given pin.
-	if (state) gpioPort_c::base->PIO_SODR = 1 << pin;
-	else gpioPort_c::base->PIO_CODR = 1 << pin;
+	if (state) {
+		this->base->PIO_SODR = 1 << pin;
+	}
+	else {
+		this->base->PIO_CODR = 1 << pin;
+	}
 }
 void gpioPort_c::PinSetHigh(uint32_t pin) {
-	gpioPort_c::base->PIO_SODR = 1 << pin;
+	this->base->PIO_SODR = 1 << pin;
 }
 void gpioPort_c::PinSetLow(uint32_t pin) {
-	gpioPort_c::base->PIO_CODR = 1 << pin;
+	this->base->PIO_CODR = 1 << pin;
 }
 
 
 bool gpioPort_c::PinRead(uint32_t pin) {
 	//Reads pin value.
-	return (gpioPort_c::base->PIO_PDSR & (1 << pin)) != 0;
+	return (this->base->PIO_PDSR & (1 << pin)) != 0;
 }
 bool gpioPort_c::PinReadSetVal(uint32_t pin) {
 	//Reads pin output register value.
-	return (gpioPort_c::base->PIO_ODSR & (1 << pin)) != 0;
+	return (this->base->PIO_ODSR & (1 << pin)) != 0;
 }
 
-void gpioPort_c::PinMode(uint32_t pin, uint32_t mode) {
-	//Sets pin control registers for desired mode.
+void gpioPort_c::PinMode(uint32_t pin, uint32_t mode, uint32_t properties) {
+	//Sets pin control registers for desired behaviour.
 	// Relevant registers:
-	// PIO_OER,  PIO_ODR,  output enable
-	// PIO_MDER, PIO_MDDR, open-drain enable
-	// PIO_PUER, PIO_PUDR, pullup enable
-	// PIO_PPDER,PIO_PPDDR,pulldown enable
-	// PIO_PER,  PIO_PDR   PIO enable (peripheral disable)
-	// PIO_ABCDSR[2],      Peripheral selection
+	// PIO_OER,  PIO_ODR,		output enable
+	// PIO_MDER, PIO_MDDR,		open-drain enable
+	// PIO_PUER, PIO_PUDR,		pullup enable
+	// PIO_PPDER,PIO_PPDDR,		pulldown enable
+	// PIO_PER,  PIO_PDR,		PIO enable (peripheral disable)
+	// PIO_ABCDSR[2],			Peripheral selection
+	// PIO_SCHMITT,				Schmitt-trigger input
+	// PIO_IFSCDR, PIO_IFSCER,	Slowclock-input enable/disable
 	
 	uint32_t bitmask = 1 << pin;
 	
+	// Select mode - what's in control of the pin
 	switch (mode) {
-		case gpioOutput:
-			gpioPort_c::base->PIO_MDDR = 1 << pin;
-			gpioPort_c::base->PIO_OER = 1 << pin;
-			gpioPort_c::base->PIO_PER = bitmask;
+		case gpio_modeOutput:
+			this->base->PIO_OER = 1 << pin;
+			this->base->PIO_PER = bitmask;
 			break;
-		case gpioOutputOpenDrain:
-			gpioPort_c::base->PIO_MDER = bitmask;
-			gpioPort_c::base->PIO_OER = bitmask;
-			gpioPort_c::base->PIO_PER = bitmask;
+		case gpio_modeInput:
+			this->base->PIO_ODR = bitmask;
+			this->base->PIO_PER = bitmask;
 			break;
-		case gpioInput:
-			gpioPort_c::base->PIO_ODR = bitmask;
-			gpioPort_c::base->PIO_PUDR = bitmask;
-			gpioPort_c::base->PIO_PPDDR = bitmask;
-			gpioPort_c::base->PIO_PER = bitmask;
+		case gpio_modePeriphA:
+			this->base->PIO_ABCDSR[0] &= ~bitmask;
+			this->base->PIO_ABCDSR[1] &= ~bitmask;
+			this->base->PIO_PDR = bitmask;
 			break;
-		case gpioInputPullup:
-			gpioPort_c::base->PIO_ODR = bitmask;
-			gpioPort_c::base->PIO_PPDDR = bitmask;
-			gpioPort_c::base->PIO_PUER = bitmask;
-			gpioPort_c::base->PIO_PER = bitmask;
+		case gpio_modePeriphB:
+			this->base->PIO_ABCDSR[0] |= bitmask;
+			this->base->PIO_ABCDSR[1] &= ~bitmask;
+			this->base->PIO_PDR = bitmask;
 			break;
-		case gpioInputPulldown:
-			gpioPort_c::base->PIO_ODR = bitmask;
-			gpioPort_c::base->PIO_PUDR = bitmask;
-			gpioPort_c::base->PIO_PPDER = bitmask;
-			gpioPort_c::base->PIO_PER = bitmask;
+		case gpio_modePeriphC:
+			this->base->PIO_ABCDSR[0] &= ~bitmask;
+			this->base->PIO_ABCDSR[1] |= bitmask;
+			this->base->PIO_PDR = bitmask;
 			break;
-		case gpioPeriphA:
-			gpioPort_c::base->PIO_ABCDSR[0] &= ~bitmask;
-			gpioPort_c::base->PIO_ABCDSR[1] &= ~bitmask;
-			gpioPort_c::base->PIO_PDR = bitmask;
-			gpioPort_c::base->PIO_PUDR = bitmask;
-			break;
-		case gpioPeriphAPullup:
-			gpioPort_c::base->PIO_ABCDSR[0] &= ~bitmask;
-			gpioPort_c::base->PIO_ABCDSR[1] &= ~bitmask;
-			gpioPort_c::base->PIO_PDR = bitmask;
-			gpioPort_c::base->PIO_PUER = bitmask;
-			break;
-		case gpioPeriphB:
-			gpioPort_c::base->PIO_ABCDSR[0] |= bitmask;
-			gpioPort_c::base->PIO_ABCDSR[1] &= ~bitmask;
-			gpioPort_c::base->PIO_PDR = bitmask;
-			gpioPort_c::base->PIO_PUDR = bitmask;
-			break;
-		case gpioPeriphBPullup:
-			gpioPort_c::base->PIO_ABCDSR[0] |= bitmask;
-			gpioPort_c::base->PIO_ABCDSR[1] &= ~bitmask;
-			gpioPort_c::base->PIO_PDR = bitmask;
-			gpioPort_c::base->PIO_PUER = bitmask;
-			break;
-		case gpioPeriphC:
-			gpioPort_c::base->PIO_ABCDSR[0] &= ~bitmask;
-			gpioPort_c::base->PIO_ABCDSR[1] |= bitmask;
-			gpioPort_c::base->PIO_PDR = bitmask;
-			gpioPort_c::base->PIO_PUDR = bitmask;
-			break;
-		case gpioPeriphCPullup:
-			gpioPort_c::base->PIO_ABCDSR[0] &= ~bitmask;
-			gpioPort_c::base->PIO_ABCDSR[1] |= bitmask;
-			gpioPort_c::base->PIO_PDR = bitmask;
-			gpioPort_c::base->PIO_PUER = bitmask;
-			break;
-		case gpioPeriphD:
-			gpioPort_c::base->PIO_ABCDSR[0] |= bitmask;
-			gpioPort_c::base->PIO_ABCDSR[1] |= bitmask;
-			gpioPort_c::base->PIO_PDR = bitmask;
-			gpioPort_c::base->PIO_PUDR = bitmask;
-			break;
-		case gpioPeriphDPullup:
-			gpioPort_c::base->PIO_ABCDSR[0] |= bitmask;
-			gpioPort_c::base->PIO_ABCDSR[1] |= bitmask;
-			gpioPort_c::base->PIO_PDR = bitmask;
-			gpioPort_c::base->PIO_PUER = bitmask;
+		case gpio_modePeriphD:
+			this->base->PIO_ABCDSR[0] |= bitmask;
+			this->base->PIO_ABCDSR[1] |= bitmask;
+			this->base->PIO_PDR = bitmask;
 			break;
 	}
 	
+	// Select properties - the pin's electrical behaviour
+	if (properties & gpio_propPullup) {
+		this->base->PIO_PPDDR = bitmask;
+		this->base->PIO_PUER = bitmask;
+	}
+	else if (properties & gpio_propPulldown) {
+		this->base->PIO_PUDR = bitmask;
+		this->base->PIO_PPDER = bitmask;
+	}
+	else { // No pullup/pulldown
+		this->base->PIO_PUDR = bitmask;
+		this->base->PIO_PPDDR = bitmask;
+	}
+	
+	if (properties & gpio_propSchmittTrig) {
+		this->base->PIO_SCHMITT |= bitmask;
+	}
+	else {
+		this->base->PIO_SCHMITT &= ~bitmask;
+	}
+	
+	if (properties & gpio_propDebounceFilter) {
+		this->base->PIO_IFSCER = bitmask;
+	}
+	else {
+		this->base->PIO_IFSCDR = bitmask;
+	}
 }
 
 // Global definiton:
-gpioPort_c gpioA('A');
-gpioPort_c gpioB('B');
+gpioPort_c samGPIOA('A');
+gpioPort_c samGPIOB('B');

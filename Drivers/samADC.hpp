@@ -20,19 +20,14 @@ enum {adc_modeFreerun = -2,
 	adc_modePWME0Trigger, 
 	adc_modePWME1Trigger};
 
-enum {//adc_gain0_5, 
-	adc_gain1, 
-	adc_gain2, 
-	adc_gain4};
-
 class samADC_c {
 	public:
 		//Initialiser: Sets up clock, trigger modes, etc.
-		void Begin(int32_t mode, uint32_t gain);
+		void Begin(int32_t mode);
 		
 		//Enable and disable a given channel. This enables both conversion of 
-		//    a channel and the GPIO control of a channel's pin!
-		// Note there is only 1 ADC at 1MSa, so 2 channels means 500kSa, etc.
+		// a channel and the GPIO control of a channel's pin!
+		//Note there is only 1 ADC at 1MSa, so 2 channels means 500kSa, etc.
 		void channelEnable(uint8_t channel);
 		void channelDisable(uint8_t channel);
 		

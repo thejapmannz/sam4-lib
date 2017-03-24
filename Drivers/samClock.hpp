@@ -52,7 +52,7 @@ class samClock_c {
 		//Start PLL, with options for predivider and multiplier.
 		// Note divider max. 0xff/8-bit, multiplier max. 0x7ff/11-bit/2047.
 		//WARNING: Set clock divider before setting source to PLL, or 
-		// you will momentarily force 200MHz into the CPU!
+		// you will momentarily force 200+MHz into the CPU!
 		void StartPLLA(uint32_t pll_predivide, uint32_t pll_multiplier);
 		void StartPLLB(uint32_t pll_predivide, uint32_t pll_multiplier);
 		
@@ -73,6 +73,7 @@ class samClock_c {
 		//Delay commands, based on frequency get.
 		void delay_us(uint32_t time_us);
 		void delay_ms(uint32_t time_ms);
+		void delay_cycles(uint32_t cycles);
 	
 	private:
 		uint32_t crystalFreq;

@@ -3,13 +3,13 @@
  * Routines for managing the SAM4S clock generators.
  *
  * Created: 4/05/2016 9:34:12 AM
- *  Author: Ben Jones
+ * Author: Ben Jones
  */ 
 
 #include "sam.h"
 
 //////////////////////////////////////////////////////////////////////////
-//COnstants. Some from Michael's code, and need checking.
+//Constants. Some from Michael's code, and need checking.
 #define MCU_MAINCK_COUNT 100 // CHECK THIS Wait counter before starting.
 #define MCU_PLL_COUNT 63 //CHECK THIS Wait counter before starting.
 
@@ -22,17 +22,18 @@ void samClock_c::CrystalStart(uint32_t crystalFreq) {
         CKGR_MOR_MOSCXTST (MCU_MAINCK_COUNT);
     
     /* Wait for the xtal oscillator to stabilize.  */
-    while (! (PMC->PMC_SR & PMC_SR_MOSCXTS))
+    while (! (PMC->PMC_SR & PMC_SR_MOSCXTS)) {
         continue;
-    
-	samClock_c::crystalFreq = crystalFreq;
+	}
+	
+	this->crystalFreq = crystalFreq;
 
     /* Could check if xtal oscillator fails to start; say if xtal
        not connected.  */
 }
 
 void samClock_c::PeriphClockEnable(uint32_t periph_id) {
-	//ENable selected peripheral clock.
+	//Enable selected peripheral clock.
 	if (periph_id < 32) {
 		PMC->PMC_PCER0 = 1 << periph_id;
 	}
@@ -55,8 +56,9 @@ void samClock_c::StartPLLA(uint32_t pll_predivide, uint32_t pll_multiplier) {
 	//WARNING: Set clock divider before setting source to PLL, or
 	// you will momentarily force 200MHz into the CPU!
 	
-	if (pll_multiplier == 0)
+	if (pll_multiplier == 0) {
 		pll_multiplier = 1; // Account for -1 in register set.
+	}
 	
 	// Disable PLLA if it is running and reset fields. Clears issues with JTAG.
 	PMC->CKGR_PLLAR = CKGR_PLLAR_ONE | CKGR_PLLAR_MULA (0);
@@ -69,16 +71,18 @@ void samClock_c::StartPLLA(uint32_t pll_predivide, uint32_t pll_multiplier) {
         | CKGR_PLLAR_PLLACOUNT (MCU_PLL_COUNT) | CKGR_PLLAR_ONE;
 
     /* Wait for PLLA to start up.  */
-    while (! (PMC->PMC_SR & PMC_SR_LOCKA))
+    while (! (PMC->PMC_SR & PMC_SR_LOCKA)) {
         continue;
+	}
 }
 void samClock_c::StartPLLB(uint32_t pll_predivide, uint32_t pll_multiplier) {
 	//Starts PLLB with given multipliers. Note divider is 8-bit, multiplier is 12-bit.
 	//WARNING: Set clock divider before setting source to PLL, or
 	// you will momentarily force 200MHz into the CPU!
 	
-	if (pll_multiplier == 0)
+	if (pll_multiplier == 0) {
 		pll_multiplier = 1; // Account for -1 in register set.
+	}
 	
 	// Disable PLLB if it is running and reset fields. Clears issues with JTAG.
 	PMC->CKGR_PLLBR = CKGR_PLLBR_MULB (0);
@@ -90,8 +94,9 @@ void samClock_c::StartPLLB(uint32_t pll_predivide, uint32_t pll_multiplier) {
         | CKGR_PLLBR_PLLBCOUNT (MCU_PLL_COUNT);
 
     /* Wait for PLLB to start up.  */
-    while (! (PMC->PMC_SR & PMC_SR_LOCKB))
+    while (! (PMC->PMC_SR & PMC_SR_LOCKB)) {
         continue;
+	}
 }
 
 void samClock_c::MasterSourceSet(uint32_t clock_source) {
@@ -110,7 +115,10 @@ void samClock_c::MasterSourceSet(uint32_t clock_source) {
 			PMC->PMC_MCKR = (PMC->PMC_MCKR & ~PMC_MCKR_CSS_Msk) | PMC_MCKR_CSS_PLLB_CLK; //Select PLLB clock
 			break;
 	}
+	
 	this->MasterFreq = 0;
+	//Set up flash wait for new frequency.
+	system_init_flash(this->MasterFreqGet());
 }
 
 void samClock_c::MainSourceSet(uint32_t clock_source) {
@@ -123,7 +131,10 @@ void samClock_c::MainSourceSet(uint32_t clock_source) {
 			PMC->CKGR_MOR = (PMC->CKGR_MOR | CKGR_MOR_KEY (0x37)) & ~CKGR_MOR_MOSCSEL; //Clear crystal select for main clock
 			break;
 	}
+	
 	this->MasterFreq = 0;
+	//Set up flash wait for new frequency.
+	system_init_flash(this->MasterFreqGet());
 }
 
 void samClock_c::PrescalerSet(uint32_t divide_amount) {
@@ -132,6 +143,8 @@ void samClock_c::PrescalerSet(uint32_t divide_amount) {
 	PMC->PMC_MCKR = (PMC->PMC_MCKR & ~PMC_MCKR_PRES_Msk) | PMC_MCKR_PRES(divide_amount);
 	
 	this->MasterFreq = 0;
+	//Set up flash wait for new frequency.
+	system_init_flash(this->MasterFreqGet());
 }
 
 void samClock_c::RCFreqSet(uint32_t rc_freq) {
@@ -151,6 +164,8 @@ void samClock_c::RCFreqSet(uint32_t rc_freq) {
 	}
 	
 	this->MasterFreq = 0;
+	//Set up flash wait for new frequency.
+	system_init_flash(this->MasterFreqGet());
 }
 
 uint32_t samClock_c::AutoSetup(uint32_t desired_freq, uint32_t crystal_freq) {
@@ -163,34 +178,34 @@ uint32_t samClock_c::AutoSetup(uint32_t desired_freq, uint32_t crystal_freq) {
 	}
 	
 	else if (desired_freq == 4000000) {
-		samClock_c::RCFreqSet(clock_RCFreq4M);
-		samClock_c::MainSourceSet(clock_MainSourceRC);
-		samClock_c::MasterSourceSet(clock_MasterSourceMain);
+		this->RCFreqSet(clock_RCFreq4M);
+		this->MainSourceSet(clock_MainSourceRC);
+		this->MasterSourceSet(clock_MasterSourceMain);
 		actual_freq = desired_freq;
 	}
 	else if (desired_freq == 8000000) {
-		samClock_c::RCFreqSet(clock_RCFreq8M);
-		samClock_c::MainSourceSet(clock_MainSourceRC);
-		samClock_c::MasterSourceSet(clock_MasterSourceMain);
+		this->RCFreqSet(clock_RCFreq8M);
+		this->MainSourceSet(clock_MainSourceRC);
+		this->MasterSourceSet(clock_MasterSourceMain);
 		actual_freq = desired_freq;
 	}
 	else if (desired_freq == 12000000) {
-		samClock_c::RCFreqSet(clock_RCFreq12M);
-		samClock_c::MainSourceSet(clock_MainSourceRC);
-		samClock_c::MasterSourceSet(clock_MasterSourceMain);
+		this->RCFreqSet(clock_RCFreq12M);
+		this->MainSourceSet(clock_MainSourceRC);
+		this->MasterSourceSet(clock_MasterSourceMain);
 		actual_freq = desired_freq;
 	}
 	else if (desired_freq == 32768) {
-		samClock_c::MasterSourceSet(clock_MasterSourceSlow);
+		this->MasterSourceSet(clock_MasterSourceSlow);
 		actual_freq = desired_freq;
 	}
 	
 	else if (crystal_freq != 0) { //Use provided crystal.
 		if (desired_freq == crystal_freq) {
-			samClock_c::CrystalStart(crystal_freq);
-			samClock_c::MainSourceSet(clock_MainSourceXtal);
-			samClock_c::MasterSourceSet(clock_MasterSourceMain);
-			samClock_c::PrescalerSet(clock_PrescalerDiv1);
+			this->CrystalStart(crystal_freq);
+			this->MainSourceSet(clock_MainSourceXtal);
+			this->MasterSourceSet(clock_MasterSourceMain);
+			this->PrescalerSet(clock_PrescalerDiv1);
 			actual_freq = desired_freq;
 		}
 		else {
@@ -217,11 +232,11 @@ uint32_t samClock_c::AutoSetup(uint32_t desired_freq, uint32_t crystal_freq) {
 				actual_freq = pll_mul * crystal_freq >> prescaler_div_nr;
 			}
 			
-			samClock_c::CrystalStart(crystal_freq);
-			samClock_c::MainSourceSet(clock_MainSourceXtal);
-			samClock_c::StartPLLA(1, pll_mul);
-			samClock_c::PrescalerSet(prescaler_div_nr); // 0-6 corresponds to the appropriate value in the enum table!
-			samClock_c::MasterSourceSet(clock_MasterSourcePLLA);
+			this->CrystalStart(crystal_freq);
+			this->MainSourceSet(clock_MainSourceXtal);
+			this->StartPLLA(1, pll_mul);
+			this->PrescalerSet(prescaler_div_nr); // 0-6 corresponds to the appropriate value in the enum table!
+			this->MasterSourceSet(clock_MasterSourcePLLA);
 			
 		}
 	}
@@ -246,15 +261,17 @@ uint32_t samClock_c::AutoSetup(uint32_t desired_freq, uint32_t crystal_freq) {
 			actual_freq = pll_mul * 12000000 >> prescaler_div_nr;
 		}
 		
-		samClock_c::RCFreqSet(clock_RCFreq12M);
-		samClock_c::MainSourceSet(clock_MainSourceRC);
-		samClock_c::StartPLLA(1, pll_mul);
-		samClock_c::PrescalerSet(prescaler_div_nr); // 0-6 corresponds to the appropriate value in the enum table!
-		samClock_c::MasterSourceSet(clock_MasterSourcePLLA);
+		this->RCFreqSet(clock_RCFreq12M);
+		this->MainSourceSet(clock_MainSourceRC);
+		this->StartPLLA(1, pll_mul);
+		this->PrescalerSet(prescaler_div_nr); // 0-6 corresponds to the appropriate value in the enum table!
+		this->MasterSourceSet(clock_MasterSourcePLLA);
 		
 	}
 	
 	this->MasterFreq = actual_freq;
+	//Set up flash wait for new frequency.
+	system_init_flash(this->MasterFreqGet());
 	return actual_freq;
 }
 
@@ -362,25 +379,42 @@ uint32_t samClock_c::MainFreqMeasure(bool wait) {
 		continue;
 	
 	if (PMC->CKGR_MCFR & CKGR_MCFR_MAINFRDY)
-		return (PMC->CKGR_MCFR & CKGR_MCFR_MAINF_Msk) * CHIP_FREQ_SLCK_RC / 16;
+		return (PMC->CKGR_MCFR & CKGR_MCFR_MAINF_Msk) * 255; // 255 = 32768 / 16;
 	else
 		return 0;
 }
 
 void samClock_c::delay_us(uint32_t time_us) {
-	//Busy wait. Note 8 instructions per loop (???)
-	uint64_t loops = (uint64_t)samClock_c::MasterFreqGet() * time_us / 8000000;
+	uint32_t loops = this->MasterFreqGet() / 1000000;
 	
-	while (loops)
-		loops--;
+	while (time_us) {
+		this->delay_cycles(loops); // Delay one microsecond
+		time_us--;
+	}
 }
 
 void samClock_c::delay_ms(uint32_t time_ms) {
-	//Busy wait. Note 7 instructions per loop (???)
-	uint64_t loops = (uint64_t)samClock_c::MasterFreqGet() * time_ms / 7000;
+	uint32_t loops = this->MasterFreqGet() / 1000;
 	
-	while (loops)
-		loops--;
+	while (time_ms) {
+		this->delay_cycles(loops); // Delay one millisecond
+		time_ms--;
+	}
+}
+
+void samClock_c::delay_cycles(uint32_t cycles) {
+	//Busy wait. Note 3 instructions per loop.
+	uint32_t loops = cycles / 3;
+	
+	asm volatile (
+		"mov r3, %[loops] \n"	// Load the loop counter
+		"loop: \n"				// Code section label
+		"    subs r3, #1 \n"	// Subtract 1 from counter
+		"    bne loop \n"		// If counter zero
+		:						// Empty output list
+		: [loops] "r" (loops)	// Input list
+		: "r3", "cc"			// Clobber list
+	);
 }
 
 //Global instance:

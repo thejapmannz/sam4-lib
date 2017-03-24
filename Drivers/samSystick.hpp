@@ -1,5 +1,8 @@
 /*
- * samSystick.hpp
+ * samSystick.hpp - the ARM Cortex SysTick timer. 
+ * 
+ * TODO: Convert from LED Debug pin (dependent on GPIO) 
+ *  to function-callback mode.
  *
  * Created: 8/05/2016 9:00:00 PM
  *  Author: Ben Jones
@@ -11,22 +14,18 @@
 
 #include "sam.h"
 
-// Global instance is samSysTick.
 
 class samSysTick_c {
 	public:
-		//Initialiser: Wait frequency, and portA pin to use for load indicator (-1 for none).
-		void Begin(uint32_t sysTickFrequency, int32_t ledDebug);
+		//Initialiser: Wait frequency
+		void Begin(uint32_t sysTickFrequency);
 		
 		//Frequency set/get, without interrupting counter.
-		void FreqSet(uint32_t frequency);
+		void FreqSet(uint32_t sysTickFrequency);
 		uint32_t FreqGet(void);
 		
-		//Busy wait for systick counter:
+		//Busy wait for systick counter, by disabling CPU clock:
 		void Wait(void);
-	
-	private:
-		int32_t ledDebug;
 };
 
 #include "samSystick.cpp"

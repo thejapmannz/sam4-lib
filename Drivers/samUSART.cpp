@@ -149,13 +149,14 @@ int16_t samUSART_c::Read(void) {
 
 
 //Constructor - allows instances for each peripheral. Not for general use.
-samUSART_c::samUSART_c(int id) {
-	this->ch_id = id;
-	
-	if (id)
+samUSART_c::samUSART_c(int id) : ch_id(id) 
+{
+	if (id) {
 		this->base = USART1;
-	else
+	}
+	else {
 		this->base = USART0;
+	}
 }
 
 
