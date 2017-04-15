@@ -11,7 +11,7 @@
  * Date: 28/10/2016
  */
 
-
+#include "stdarg.h"
 
 void SerialStream::WriteStr(char buffer[], int32_t num_bytes) {
 	//Writes a whole string to internal buffer, to be sent.
@@ -68,3 +68,110 @@ void SerialStream::ReadStr(char buffer[], uint32_t num_bytes) {
 		buffer[i] = this->Read();
 	}
 }
+
+void SerialStream::PrintNum(int64_t value, bool signedValue, uint32_t base)
+{
+	//Prints a number out in human-readable form. 
+	
+	char buff[25]; // Max uint64_t value is 20 digits long.
+	char *ptr = buff + 24; // Will be writing to end of buffer.
+	
+	if ((value < 0) && signedValue) 
+	{
+		this->Write('-');
+		value = -value;
+	}
+	
+	*ptr = '\0'; // Null terminator
+	
+	// Convert to ascii:
+	do {
+		*(--ptr) = '0' + (value % base);
+		value /= base;
+	} while ((value > 0 && ptr > buff));
+	
+	// Write out buffer:
+	this->WriteStr(ptr, -1);
+}
+
+
+
+void SerialStream::printf(const char* format, ...) 
+{
+	// Basic implementation of formatted text printing. 
+	char cc;
+	
+	//Handle argument list:
+	va_list arg;
+	va_start(arg, format);
+	
+	//Iterate through format string:
+	while ((cc = *(format++))) 
+	{
+		if (cc != '%') 
+		{
+			this->Write(cc); // Pass through normal text
+		}
+		
+		else 
+		{
+			cc = *(format++); // cc will now be the data type to print
+			
+			switch (cc) {
+				default:
+					break; // Handle unknown format specifiers nicely.
+				case 0:
+					format--; // So while loop will catch the zero
+					break;
+					
+				case '%': // Print percent.
+					this->Write('%');
+					break;
+				
+				case 'c': // Character
+					this->Write((char)va_arg(arg, unsigned int));
+					break;
+				
+				case 's': // String
+					char* strPtr;
+					strPtr = va_arg(arg, char*);
+					this->WriteStr(strPtr, -1);
+					break;
+					
+				case 'd': // Decimal
+				case 'u': // Unsigned
+				case 'i': // Integer
+					this->PrintNum(va_arg(arg, unsigned int), true, 10);
+					break;
+				case 'b': // Binary/bitfield
+					this->PrintNum(va_arg(arg, unsigned int), false, 2);
+					break;
+				case 'x': // Hex
+					this->PrintNum(va_arg(arg, unsigned int), false, 16);
+					break;
+				case 'o': // Octal
+					this->PrintNum(va_arg(arg, unsigned int), false, 8);
+					break;
+			}
+		}
+	}
+	
+	va_end(arg);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
