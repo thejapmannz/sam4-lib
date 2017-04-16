@@ -44,6 +44,10 @@ void clockInit(void) {
 }
 
 void gpioInit(void) {
+	
+	samGPIOA.Begin();
+	samGPIOB.Begin();
+	
 	samGPIOA.PinMode(led0, gpio_modeOutput, gpio_propNormal);
 	samGPIOA.PinMode(led1, gpio_modeOutput, gpio_propNormal);
 	
@@ -51,10 +55,9 @@ void gpioInit(void) {
 	samGPIOA.PinMode(uart_tx, gpio_modePeriphA, gpio_propNormal); // UART1 Tx
 }
 
-void welcomeMessage(void) {
-	samUART1.WriteStr("SAM4S: Init success. Clock freq: ", -1);
-	samUART1.PrintInt(samClock.MasterFreqGet());
-	samUART1.Write('\n');
+void welcomeMessage(void) 
+{
+	samUART1.printf("SAM4S: Init success. Clock freq: %d\n", samClock.MasterFreqGet());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -75,9 +78,9 @@ int main(void)
 	while (1) {
 		
 		//LED load indicator and SysTick pacer:
-		samGPIOA.PinSetLow(led1);
+		samGPIOA.PinSetLow(led0);
 		samSysTick.Wait();
-		samGPIOA.PinSetHigh(led1);
+		samGPIOA.PinSetHigh(led0);
 		
 		//UART echo:
 		while (samUART1.Available()) {
@@ -85,9 +88,7 @@ int main(void)
 		}
 		
 		//Temperature log:
-		samUART1.WriteStr("Temp: ", -1);
-		samUART1.PrintInt(samADC.Read(15));
-		samUART1.Write('\n');
+		samUART1.printf(Temperature: %d\n", samADC.Read(15));
 		samADC.Trigger();
 		
 		//Blinky and watchdog:
