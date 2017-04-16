@@ -90,7 +90,7 @@ void samUART_c::Write(uint8_t byte)
 	this->transmitBuffer.Push(byte);
 	
 	//Enable transmit interrupts, to call update function.
-	UART1->UART_IER = UART_IER_TXRDY;
+	this->base_id->UART_IER = UART_IER_TXRDY;
 }
 
 int16_t samUART_c::Read(void) 
@@ -110,7 +110,7 @@ void samUART_c::Update(void)
 		this->uartWrite(this->transmitBuffer.Pop());
 	}
 	else { // Don't want spontaneous interrupts.
-		UART1->UART_IDR = UART_IER_TXRDY;
+		this->base_id->UART_IDR = UART_IER_TXRDY;
 	}
 	
 	if (this->uartReadReady()) {

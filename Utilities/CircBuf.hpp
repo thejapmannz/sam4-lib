@@ -32,6 +32,7 @@ class CircBuf_c {
 		data_t bufPtr[BuffSize];
 		uint32_t readPtr;
 		uint32_t writePtr;
+		
 		//uint32_t count;
 };
 

@@ -29,7 +29,7 @@ class SerialStream {
 		//For formatted text writes e.g. printf:
 		void PrintInt(int64_t value);
 		void PrintBits(uint32_t value);
-		void PrintNum(int64_t value, bool signedValue, uint32_t base);
+		void PrintNum(int64_t value, bool signedValue, uint32_t base, uint32_t whitespace_pad);
 		
 		//For direct-copy reads:
 		void ReadStr(char buffer[], uint32_t num_bytes);

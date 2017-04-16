@@ -69,12 +69,13 @@ void SerialStream::ReadStr(char buffer[], uint32_t num_bytes) {
 	}
 }
 
-void SerialStream::PrintNum(int64_t value, bool signedValue, uint32_t base)
+void SerialStream::PrintNum(int64_t value, bool signedValue, uint32_t base, uint32_t whitespace_pad)
 {
 	//Prints a number out in human-readable form. 
 	
-	char buff[25]; // Max uint64_t value is 20 digits long.
-	char *ptr = buff + 24; // Will be writing to end of buffer.
+#define buff_len 50         // Note max uint64_t value is 20 digits long, plus whitespace.
+	char buff[buff_len]; 
+	char *ptr = buff + buff_len - 1; // Will be writing to end of buffer.
 	
 	if ((value < 0) && signedValue) 
 	{
@@ -89,6 +90,13 @@ void SerialStream::PrintNum(int64_t value, bool signedValue, uint32_t base)
 		*(--ptr) = '0' + (value % base);
 		value /= base;
 	} while ((value > 0 && ptr > buff));
+	
+	//Whitespace pad, if needed:
+	// while used_characters < whitespace_width
+	while ((buff - ptr + buff_len) < whitespace_pad && ptr > buff)
+	{
+		*(--ptr) = ' ';
+	}
 	
 	// Write out buffer:
 	this->WriteStr(ptr, -1);
@@ -141,16 +149,16 @@ void SerialStream::printf(const char* format, ...)
 				case 'd': // Decimal
 				case 'u': // Unsigned
 				case 'i': // Integer
-					this->PrintNum(va_arg(arg, unsigned int), true, 10);
+					this->PrintNum(va_arg(arg, unsigned int), true, 10, 0);
 					break;
 				case 'b': // Binary/bitfield
-					this->PrintNum(va_arg(arg, unsigned int), false, 2);
+					this->PrintNum(va_arg(arg, unsigned int), false, 2, 32);
 					break;
 				case 'x': // Hex
-					this->PrintNum(va_arg(arg, unsigned int), false, 16);
+					this->PrintNum(va_arg(arg, unsigned int), false, 16, 0);
 					break;
 				case 'o': // Octal
-					this->PrintNum(va_arg(arg, unsigned int), false, 8);
+					this->PrintNum(va_arg(arg, unsigned int), false, 8, 0);
 					break;
 			}
 		}

@@ -375,11 +375,12 @@ uint32_t samClock_c::MainFreqMeasure(bool wait) {
 	//Calculates master clock frequency from measurement register.
 	//Option to wait for measurement to be ready, if not already.
 	
-	while (wait && !(PMC->CKGR_MCFR & CKGR_MCFR_MAINFRDY))
+	while (wait && !(PMC->CKGR_MCFR & CKGR_MCFR_MAINFRDY)) {
 		continue;
+	}
 	
 	if (PMC->CKGR_MCFR & CKGR_MCFR_MAINFRDY)
-		return (PMC->CKGR_MCFR & CKGR_MCFR_MAINF_Msk) * 255; // 255 = 32768 / 16;
+		return (PMC->CKGR_MCFR & CKGR_MCFR_MAINF_Msk) * 2048; // 2048 = 32768 / 16;
 	else
 		return 0;
 }

@@ -15,6 +15,7 @@ CircBuf_c<data_t, BuffSize>::CircBuf_c() {
 	//Initialise buffer's values.
 	this->readPtr = 0;
 	this->writePtr = 0;
+	
 	//this->count = 0;
 }
 
@@ -34,9 +35,9 @@ void CircBuf_c<data_t, BuffSize>::Push(data_t data) {
 			this->readPtr = 0;
 		}
 	}
-	//else {
-	//	this->count++;
-	//}
+	/*else {
+		this->count++;
+	}*/
 }
 
 template <class data_t, uint32_t BuffSize>
@@ -61,4 +62,6 @@ uint32_t CircBuf_c<data_t, BuffSize>::Available(void)
 		count += BuffSize;
 	}
 	return (uint32_t)count;
+	
+	//return this->count;
 }
