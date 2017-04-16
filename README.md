@@ -15,7 +15,7 @@ Copy-paste this into a blank Atmel Studio project's main file.
  * Simple blinky and serial debug. Uses 2 LEDs and 2 serial pins only.
  *
  * Created: 26/07/2016
- * Updated: 24/03/2017
+ * Updated: 16/04/2017
  * Author : Ben Jones
  */ 
 
