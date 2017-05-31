@@ -24,6 +24,7 @@ class CircBuf_c {
 	
 		//Read:
 		data_t Pop(void);
+		data_t Peek(void);
 	
 		//Bytes available:
 		uint32_t Available(void);

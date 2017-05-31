@@ -22,16 +22,16 @@ class samUART_c: public SerialStream {
 		//Initialiser - baud rate, parity.
 		void Begin(uint32_t baud, uint32_t parity);
 		
-		//Write things to internal buffer:
-		void Write(uint8_t byte);
-		
-		//Check if byte available, and Read a byte(s):
-		uint32_t Available(void);
+		//Access internal buffer to send/recieve bytes. 
+		// I recommend using the functions in the SerialStream class instead!
+		uint32_t Available(void); // How many bytes in buffer
 		int16_t Read(void); // Note returns -1 if receive buffer empty.
+		int16_t Peek(void); // Same as read but doesn't consume data.
+		void Write(uint8_t byte); // Write a byte to the internal buffer
+		
 		
 		//Updater - called as interrupt handler, but can be polled also.
 		void Update(void);
-		
 		//constructor - one instance for UART0 and UART1.
 		samUART_c(int id);
 		

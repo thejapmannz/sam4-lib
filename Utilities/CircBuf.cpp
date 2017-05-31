@@ -55,6 +55,16 @@ data_t CircBuf_c<data_t, BuffSize>::Pop(void) {
 }
 
 template <class data_t, uint32_t BuffSize>
+data_t CircBuf_c<data_t, BuffSize>::Peek(void) {
+	//Read one value from buffer.
+	data_t read_data = 0;
+	if (this->Available()) {
+		read_data = this->bufPtr[this->readPtr];
+	}
+	return read_data;
+}
+
+template <class data_t, uint32_t BuffSize>
 uint32_t CircBuf_c<data_t, BuffSize>::Available(void) 
 {
 	int64_t count = this->writePtr - this->readPtr;

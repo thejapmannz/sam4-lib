@@ -48,6 +48,33 @@ void samUART_c::Begin(uint32_t baud, uint32_t parity)
 	this->base_id->UART_CR |= UART_CR_RXEN | UART_CR_TXEN;
 }
 
+//Returns number of bytes available to read.
+uint32_t samUART_c::Available(void) {
+	return this->recieveBuffer.Available();
+}
+//Write a byte into internal buffer.
+void samUART_c::Write(uint8_t byte) {
+	this->transmitBuffer.Push(byte);
+	//Enable transmit interrupts, to call update function.
+	this->base_id->UART_IER = UART_IER_TXRDY;
+}
+//Returns a byte from the internal buffer.
+int16_t samUART_c::Read(void) {
+	if (this->Available())
+		return this->recieveBuffer.Pop();
+	else
+		return -1;
+}
+//Returns a byte from the internal buffer, without consuming.
+int16_t samUART_c::Peek(void) {
+	if (this->Available())
+		return this->recieveBuffer.Peek();
+	else
+		return -1;
+}
+
+
+
 bool samUART_c::uartReadReady(void) 
 {
 	//Checks read-ready bit.
@@ -78,29 +105,7 @@ void samUART_c::uartWrite(uint8_t byte)
 	this->base_id->UART_THR = byte;
 }
 
-uint32_t samUART_c::Available(void) 
-{
-	//Returns number of bytes available to read.
-	return this->recieveBuffer.Available();
-}
 
-void samUART_c::Write(uint8_t byte) 
-{
-	//Write a byte into internal buffer.
-	this->transmitBuffer.Push(byte);
-	
-	//Enable transmit interrupts, to call update function.
-	this->base_id->UART_IER = UART_IER_TXRDY;
-}
-
-int16_t samUART_c::Read(void) 
-{
-	//Returns a byte from the internal buffer.
-	if (this->Available())
-		return this->recieveBuffer.Pop();
-	else
-		return -1;
-}
 
 void samUART_c::Update(void) 
 {
@@ -120,6 +125,7 @@ void samUART_c::Update(void)
 		}
 	}
 }
+
 
 // Global definition:
 samUART_c samUART0(0);

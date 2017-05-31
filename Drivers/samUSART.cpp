@@ -103,10 +103,7 @@ void samUSART_c::Begin(uint32_t mode, uint32_t baud_clockrate, uint32_t parity, 
 	
 	//Set up and enable interrupts:
 	this->base->US_IER = US_IER_RXRDY; // Enable receive interrupts - transmit enabled when necessary.
-	if (this->ch_id)
-		NVIC_EnableIRQ(USART1_IRQn); // Enable USART interrupts.
-	else
-		NVIC_EnableIRQ(USART0_IRQn);
+	NVIC_EnableIRQ(this->ch_id ? USART1_IRQn : USART0_IRQn); // Enable USART interrupts.
 	
 	//Enable Tx and Rx, reset any errors:
 	this->base->US_CR = US_CR_RXEN | US_CR_TXEN | US_CR_RSTSTA;
@@ -143,6 +140,13 @@ uint32_t samUSART_c::Available(void) {
 int16_t samUSART_c::Read(void) {
 	if (this->recieveBuffer.Available())
 		return this->recieveBuffer.Pop();
+	else
+		return -1;
+}
+//Read a single byte from internal buffer, without consuming.
+int16_t samUSART_c::Peek(void) {
+	if (this->recieveBuffer.Available())
+		return this->recieveBuffer.Peek();
 	else
 		return -1;
 }

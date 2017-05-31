@@ -54,16 +54,15 @@ class samUSART_c: public SerialStream {
 		//Initialiser: sets up peripheral. Use bitwise OR for multiple options.
 		void Begin(uint32_t mode, uint32_t baud_clockrate, uint32_t parity, uint32_t options);
 		
-		//Write things to internal buffer:
-		void Write(uint8_t byte);
-		
-		//Check if byte available, and Read a byte(s):
-		uint32_t Available(void);
+		//Access internal buffer to send/recieve bytes. 
+		// I recommend using the functions in the SerialStream class instead!
+		uint32_t Available(void); // How many bytes in buffer
 		int16_t Read(void); // Note returns -1 if receive buffer empty.
+		int16_t Peek(void); // Same as read but doesn't consume data.
+		void Write(uint8_t byte);
 		
 		//Updater - called as interrupt handler, but can be polled also.
 		void Update(void);
-		
 		//Constructor - allows instances for each peripheral. Not for general use.
 		samUSART_c(int id);
 	
